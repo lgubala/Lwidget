@@ -40,6 +40,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -111,6 +113,21 @@ class ReorderAdapter(
 class MainActivity : AppCompatActivity() {
 
     private lateinit var prefs: SharedPreferences
+
+    /** Health Connect figures are device-wide, so they're cached outside the per-widget prefs. */
+    private val globalPrefs: SharedPreferences by lazy {
+        getSharedPreferences("com.leanbitlab.lwidget.PREFS", Context.MODE_PRIVATE)
+    }
+
+    private val healthPermissionLauncher = registerForActivityResult(
+        androidx.health.connect.client.PermissionController.createRequestPermissionResultContract()
+    ) { granted ->
+        if (granted.containsAll(HealthConnectRepository.PERMISSIONS)) {
+            refreshHealthData()
+        } else {
+            updateHealthStatus()
+        }
+    }
     private val contentSwitches = mutableListOf<SwitchMaterial>()
     private var clockAppPackages = listOf("default")
     private var currentWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
@@ -1054,6 +1071,7 @@ class MainActivity : AppCompatActivity() {
         setupRamSection()
         setupStepsSection()
         setupScreenTimeSection()
+        setupHealthConnectSection()
         setupKeepAliveSection()
         setupBatteryOptimizationSection()
         setupEventsAndTasksSections()
@@ -1407,6 +1425,97 @@ class MainActivity : AppCompatActivity() {
             checkAllPermissions()
         }
     }
+    private fun setupHealthConnectSection() {
+        val healthSwitch = bindFoldedSection(
+            R.id.header_health_connect, R.drawable.ic_heart, getString(R.string.category_health),
+            R.id.content_health_connect, R.id.row_health_connect_toggle,
+            "use_health_connect", false
+        )
+
+        bindFoldedSectionless(R.id.row_sleep_toggle, getString(R.string.section_sleep), "show_sleep", R.id.row_sleep_size, "size_sleep")
+        bindFoldedSectionless(R.id.row_resting_hr_toggle, getString(R.string.section_resting_hr), "show_resting_hr", R.id.row_resting_hr_size, "size_resting_hr")
+        bindFoldedSectionless(R.id.row_calories_toggle, getString(R.string.section_calories), "show_calories", R.id.row_calories_size, "size_calories")
+
+        healthSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked && !HealthConnectRepository.isAvailable(this)) {
+                healthSwitch.isChecked = false
+                updateHealthStatus()
+                return@setOnCheckedChangeListener
+            }
+            prefs.edit().putBoolean("use_health_connect", isChecked).apply()
+            if (isChecked) {
+                requestHealthPermissions()
+            } else {
+                updateWidget()
+                updateHealthStatus()
+            }
+        }
+
+        findViewById<View>(R.id.text_health_status).setOnClickListener {
+            if (HealthConnectRepository.isAvailable(this)) requestHealthPermissions()
+        }
+
+        updateHealthStatus()
+    }
+
+    /** A plain toggle plus its size slider, for metrics that live inside another card. */
+    private fun bindFoldedSectionless(toggleRowId: Int, title: String, prefKey: String, sizeRowId: Int, sizePrefKey: String) {
+        val sizeRow = findViewById<View>(sizeRowId)
+        bindSlider(sizeRowId, "Size", sizePrefKey, 14f, 10f, 40f, suffix = "")
+        sizeRow.visibility = if (prefs.getBoolean(prefKey, false)) View.VISIBLE else View.GONE
+        bindToggle(toggleRowId, title, prefKey, false) { isChecked ->
+            sizeRow.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun requestHealthPermissions() {
+        lifecycleScope.launch {
+            if (HealthConnectRepository.hasPermissions(this@MainActivity)) {
+                refreshHealthData()
+            } else {
+                try {
+                    healthPermissionLauncher.launch(HealthConnectRepository.PERMISSIONS)
+                } catch (e: Exception) {
+                    android.util.Log.e("MainActivity", "Cannot request Health Connect permissions", e)
+                    updateHealthStatus()
+                }
+            }
+        }
+    }
+
+    private fun refreshHealthData() {
+        lifecycleScope.launch {
+            HealthConnectRepository.refresh(this@MainActivity, globalPrefs)
+            updateHealthStatus()
+            updateWidget()
+        }
+    }
+
+    private fun updateHealthStatus() {
+        val status = findViewById<TextView>(R.id.text_health_status) ?: return
+        if (!HealthConnectRepository.isAvailable(this)) {
+            status.text = getString(R.string.health_status_unavailable)
+            return
+        }
+        if (!prefs.getBoolean("use_health_connect", false)) {
+            status.text = getString(R.string.health_hint)
+            return
+        }
+        lifecycleScope.launch {
+            status.text = when {
+                !HealthConnectRepository.hasPermissions(this@MainActivity) ->
+                    getString(R.string.health_status_needs_permission)
+                !HealthConnectRepository.hasCachedData(globalPrefs) ->
+                    getString(R.string.health_status_no_data)
+                else -> {
+                    val at = globalPrefs.getLong(HealthConnectRepository.KEY_LAST_SYNC, 0L)
+                    val formatted = android.text.format.DateFormat.getTimeFormat(this@MainActivity).format(java.util.Date(at))
+                    getString(R.string.health_status_connected, formatted)
+                }
+            }
+        }
+    }
+
     private fun setupKeepAliveSection() {
         // Keep Alive (now inside Advanced section, not folded)
         bindToggle(R.id.row_keep_alive_toggle, getString(R.string.row_enable_keep_alive), "keep_alive", false) { isChecked ->

@@ -1364,6 +1364,95 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- CATEGORY: HEALTH CONNECT -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category_health"
+                android:textColor="?attr/colorPrimary"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:letterSpacing="0.05"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_health_connect"
+                style="@style/Widget.Material3.CardView.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <include layout="@layout/settings_folded_header"
+                        android:id="@+id/header_health_connect"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                    <LinearLayout
+                        android:id="@+id/content_health_connect"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="8dp">
+
+                        <TextView
+                            android:id="@+id/text_health_status"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="12sp"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="8dp"
+                            android:text="@string/health_hint"/>
+
+                        <include layout="@layout/settings_toggle_row"
+                            android:id="@+id/row_health_connect_toggle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                        <include layout="@layout/settings_toggle_row"
+                            android:id="@+id/row_sleep_toggle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                        <include layout="@layout/settings_slider_row"
+                            android:id="@+id/row_sleep_size"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                        <include layout="@layout/settings_toggle_row"
+                            android:id="@+id/row_resting_hr_toggle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                        <include layout="@layout/settings_slider_row"
+                            android:id="@+id/row_resting_hr_size"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                        <include layout="@layout/settings_toggle_row"
+                            android:id="@+id/row_calories_toggle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                        <include layout="@layout/settings_slider_row"
+                            android:id="@+id/row_calories_size"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- CATEGORY: AGENDA -->
             <TextView
                 android:layout_width="wrap_content"

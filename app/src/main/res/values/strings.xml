@@ -106,6 +106,16 @@
     <string name="bp_label_disk">DISK</string>
     <string name="bp_label_net">NET</string>
     <string name="bp_label_ram">RAM</string>
+    <string name="category_health">Health Connect</string>
+    <string name="section_health_connect">Use Health Connect</string>
+    <string name="section_sleep">Sleep</string>
+    <string name="section_resting_hr">Resting Heart Rate</string>
+    <string name="section_calories">Calories</string>
+    <string name="health_hint">Reads steps, sleep, resting heart rate and calories from Health Connect, so figures come from your watch instead of the phone sensor. Turn on Health Connect sync in Garmin Connect first. Body Battery and sleep score are not shared by Garmin and cannot be shown.</string>
+    <string name="health_status_unavailable">Health Connect is not available on this device.</string>
+    <string name="health_status_needs_permission">Tap to grant Lwidget access to your health data.</string>
+    <string name="health_status_connected">Connected. Last sync: %s</string>
+    <string name="health_status_no_data">Connected, but nothing has synced yet. Check that Garmin Connect is sharing with Health Connect.</string>
     <string name="color_default">Default</string>
     <string name="color_system_accent">System Accent</string>
     <string name="color_custom">Custom</string>

@@ -314,8 +314,11 @@ class AwidgetProvider : AppWidgetProvider() {
             val showNextAlarm = prefs.getBoolean("show_next_alarm", true)
             val sizeNextAlarm = prefs.getFloat("size_next_alarm", 14f)
 
+            // Steps read from Health Connect come from the watch, so neither the phone's step
+            // sensor permission nor its foreground service are involved.
+            val stepsFromHealthConnect = prefs.getBoolean("use_health_connect", false)
             var showSteps = prefs.getBoolean("show_steps", false)
-            if (showSteps && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            if (showSteps && !stepsFromHealthConnect && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                 if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACTIVITY_RECOGNITION) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                     showSteps = false
                 }
@@ -329,7 +332,8 @@ class AwidgetProvider : AppWidgetProvider() {
             val hasActivityPerm = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                 androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACTIVITY_RECOGNITION) == android.content.pm.PackageManager.PERMISSION_GRANTED
             } else true
-            if ((showSteps || keepAlive) && hasActivityPerm) {
+            val needsStepService = (showSteps && !stepsFromHealthConnect) || keepAlive
+            if (needsStepService && hasActivityPerm) {
                 try {
                     context.startForegroundService(serviceIntent)
                 } catch (e: Exception) {
@@ -769,7 +773,53 @@ class AwidgetProvider : AppWidgetProvider() {
                 views.setInt(R.id.icon_screen_time, "setColorFilter", secondaryColor)
                 updateScreenTime(context, views, prefs)
             }
-            
+
+            // --- Health Connect figures (steps come from the shared step view above) ---
+            val healthPrefs = context.getSharedPreferences("com.leanbitlab.lwidget.PREFS", Context.MODE_PRIVATE)
+            val useHealthConnect = prefs.getBoolean("use_health_connect", false)
+
+            data class HealthItem(
+                val layoutId: Int, val textId: Int, val iconId: Int,
+                val show: Boolean, val size: Float, val text: String?
+            )
+
+            val sleepMinutes = healthPrefs.getInt(HealthConnectRepository.KEY_SLEEP_MINUTES, -1)
+            val restingHr = healthPrefs.getInt(HealthConnectRepository.KEY_RESTING_HR, -1)
+            val calories = healthPrefs.getInt(HealthConnectRepository.KEY_CALORIES, -1)
+
+            val healthItems = listOf(
+                HealthItem(
+                    R.id.layout_sleep, R.id.text_sleep, R.id.icon_sleep,
+                    useHealthConnect && prefs.getBoolean("show_sleep", false),
+                    prefs.getFloat("size_sleep", 14f),
+                    if (sleepMinutes >= 0) "${sleepMinutes / 60}h ${sleepMinutes % 60}m" else null
+                ),
+                HealthItem(
+                    R.id.layout_resting_hr, R.id.text_resting_hr, R.id.icon_resting_hr,
+                    useHealthConnect && prefs.getBoolean("show_resting_hr", false),
+                    prefs.getFloat("size_resting_hr", 14f),
+                    if (restingHr > 0) "$restingHr" else null
+                ),
+                HealthItem(
+                    R.id.layout_calories, R.id.text_calories, R.id.icon_calories,
+                    useHealthConnect && prefs.getBoolean("show_calories", false),
+                    prefs.getFloat("size_calories", 14f),
+                    if (calories >= 0) "$calories" else null
+                )
+            )
+
+            for (item in healthItems) {
+                val visible = item.show && item.text != null
+                views.setViewVisibility(item.layoutId, if (visible) android.view.View.VISIBLE else android.view.View.GONE)
+                if (visible) {
+                    views.setTextViewText(item.textId, item.text)
+                    views.setTextViewTextSize(item.textId, android.util.TypedValue.COMPLEX_UNIT_SP, item.size)
+                    views.setTextColor(item.textId, secondaryColor)
+                    views.setInt(item.iconId, "setColorFilter", secondaryColor)
+                }
+            }
+
+
             // --- Dynamic Spacing Logic for Both Sides ---
             fun dpToPx(dp: Float): Int {
                 return (dp * context.resources.displayMetrics.density).toInt()
@@ -1006,7 +1056,11 @@ class AwidgetProvider : AppWidgetProvider() {
             return views
         }
 
-        fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, mode: UpdateMode = UpdateMode.FULL) {
+        suspend fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, mode: UpdateMode = UpdateMode.FULL) {
+            val globalPrefs = context.getSharedPreferences("com.leanbitlab.lwidget.PREFS", Context.MODE_PRIVATE)
+            if (globalPrefs.getBoolean("use_health_connect", false)) {
+                HealthConnectRepository.refreshIfStale(context, globalPrefs)
+            }
             val views = buildAppWidgetRemoteViews(context, appWidgetId, mode)
             if (mode == UpdateMode.FULL) {
                 appWidgetManager.updateAppWidget(appWidgetId, views)
@@ -1591,11 +1645,15 @@ class AwidgetProvider : AppWidgetProvider() {
 
         private fun loadStepCount(views: RemoteViews, prefs: android.content.SharedPreferences) {
             try {
-                val totalSteps = prefs.getFloat("last_total_steps", 0f)
-                val baselineSteps = prefs.getFloat("step_baseline", 0f)
-                val savedDate = prefs.getString("step_date", "") ?: ""
-
-                val dailySteps = calculateDailySteps(totalSteps, baselineSteps, savedDate)
+                val dailySteps = if (prefs.getBoolean("use_health_connect", false)) {
+                    // Watch-reported steps, which also spares us the phone's sensor service
+                    prefs.getInt(HealthConnectRepository.KEY_STEPS, 0)
+                } else {
+                    val totalSteps = prefs.getFloat("last_total_steps", 0f)
+                    val baselineSteps = prefs.getFloat("step_baseline", 0f)
+                    val savedDate = prefs.getString("step_date", "") ?: ""
+                    calculateDailySteps(totalSteps, baselineSteps, savedDate)
+                }
                 val span = android.text.SpannableString("$dailySteps")
                 
                 if (prefs.getBoolean("bold_steps", false)) {

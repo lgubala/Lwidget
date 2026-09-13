@@ -208,6 +208,93 @@
                     android:textSize="15sp"
                     android:includeFontPadding="false" />
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_sleep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/icon_sleep"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_sleep"
+                    android:importantForAccessibility="no" />
+
+                <TextView
+                    android:id="@+id/text_sleep"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="--"
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="15sp"
+                    android:includeFontPadding="false" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_resting_hr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/icon_resting_hr"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_heart"
+                    android:importantForAccessibility="no" />
+
+                <TextView
+                    android:id="@+id/text_resting_hr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="--"
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="15sp"
+                    android:includeFontPadding="false" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_calories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/icon_calories"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_flame"
+                    android:importantForAccessibility="no" />
+
+                <TextView
+                    android:id="@+id/text_calories"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="--"
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="15sp"
+                    android:includeFontPadding="false" />
+            </LinearLayout>
         </LinearLayout>
         </RelativeLayout>
 
