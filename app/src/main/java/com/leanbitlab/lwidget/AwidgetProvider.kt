@@ -232,13 +232,7 @@ class AwidgetProvider : AppWidgetProvider() {
 
         // Suspended function called from Coroutine
         fun buildAppWidgetRemoteViews(context: Context, appWidgetId: Int, mode: UpdateMode = UpdateMode.FULL): RemoteViews {
-            val globalPrefs = context.getSharedPreferences("com.leanbitlab.lwidget.PREFS", Context.MODE_PRIVATE)
-            val prefs = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                val wPrefs = context.getSharedPreferences("com.leanbitlab.lwidget.PREFS_$appWidgetId", Context.MODE_PRIVATE)
-                FallbackPreferences(wPrefs, globalPrefs)
-            } else {
-                globalPrefs
-            }
+            val prefs = widgetPrefs(context, appWidgetId)
 
             // --- Load Preferences ---
             val showTime = prefs.getBoolean("show_time", true)
@@ -948,6 +942,15 @@ class AwidgetProvider : AppWidgetProvider() {
                 views.setInt(R.id.icon_tasks_header, "setColorFilter", labelColor)
                 views.setInt(R.id.icon_events_header, "setColorFilter", labelColor)
 
+                // Two bio columns; an empty one collapses and the pulse icon only shows over content
+                fun healthVisible(layoutId: Int) = healthItems.any { it.layoutId == layoutId && it.show && it.text != null }
+                val activityColumn = showSteps || healthVisible(R.id.layout_calories) || healthVisible(R.id.layout_resting_hr)
+                val restColumn = showScreenTime || healthVisible(R.id.layout_sleep)
+                views.setViewVisibility(R.id.bio_col_activity, if (activityColumn) android.view.View.VISIBLE else android.view.View.GONE)
+                views.setViewVisibility(R.id.bio_col_rest, if (restColumn) android.view.View.VISIBLE else android.view.View.GONE)
+                views.setViewVisibility(R.id.icon_bio_header, if (activityColumn || restColumn) android.view.View.VISIBLE else android.view.View.GONE)
+                views.setInt(R.id.icon_bio_header, "setColorFilter", labelColor)
+
                 // Bottom system row
                 val sysCells = listOf(
                     Triple(R.id.cell_batt, showBattery, R.id.label_batt),
@@ -1056,9 +1059,24 @@ class AwidgetProvider : AppWidgetProvider() {
             return views
         }
 
-        suspend fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, mode: UpdateMode = UpdateMode.FULL) {
+        /** The same widget-then-global lookup the settings screen writes through. */
+        private fun widgetPrefs(context: Context, appWidgetId: Int): SharedPreferences {
             val globalPrefs = context.getSharedPreferences("com.leanbitlab.lwidget.PREFS", Context.MODE_PRIVATE)
-            if (globalPrefs.getBoolean("use_health_connect", false)) {
+            return if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                FallbackPreferences(
+                    context.getSharedPreferences("com.leanbitlab.lwidget.PREFS_$appWidgetId", Context.MODE_PRIVATE),
+                    globalPrefs
+                )
+            } else {
+                globalPrefs
+            }
+        }
+
+        suspend fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, mode: UpdateMode = UpdateMode.FULL) {
+            // The toggle is saved per widget, so it has to be read per widget; the figures
+            // themselves are device-wide and cached globally.
+            if (widgetPrefs(context, appWidgetId).getBoolean("use_health_connect", false)) {
+                val globalPrefs = context.getSharedPreferences("com.leanbitlab.lwidget.PREFS", Context.MODE_PRIVATE)
                 HealthConnectRepository.refreshIfStale(context, globalPrefs)
             }
             val views = buildAppWidgetRemoteViews(context, appWidgetId, mode)

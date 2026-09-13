@@ -1456,6 +1456,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateHealthStatus()
+
+        // Opening settings pulls fresh figures instead of waiting for the next scheduled update
+        if (prefs.getBoolean("use_health_connect", false) && HealthConnectRepository.isAvailable(this)) {
+            lifecycleScope.launch {
+                if (HealthConnectRepository.hasPermissions(this@MainActivity)) refreshHealthData()
+            }
+        }
     }
 
     /** A plain toggle plus its size slider, for metrics that live inside another card. */
@@ -1510,7 +1517,8 @@ class MainActivity : AppCompatActivity() {
                 else -> {
                     val at = globalPrefs.getLong(HealthConnectRepository.KEY_LAST_SYNC, 0L)
                     val formatted = android.text.format.DateFormat.getTimeFormat(this@MainActivity).format(java.util.Date(at))
-                    getString(R.string.health_status_connected, formatted)
+                    val steps = globalPrefs.getInt(HealthConnectRepository.KEY_STEPS, 0)
+                    getString(R.string.health_status_connected, formatted, java.text.NumberFormat.getIntegerInstance().format(steps))
                 }
             }
         }

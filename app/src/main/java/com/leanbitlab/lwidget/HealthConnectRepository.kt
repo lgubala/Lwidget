@@ -9,6 +9,7 @@ import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.request.AggregateRequest
+import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import java.time.Duration
 import java.time.Instant
@@ -90,11 +91,16 @@ object HealthConnectRepository {
         val editor = prefs.edit()
         var any = false
 
-        aggregateOrNull(client, setOf(StepsRecord.COUNT_TOTAL), dayStart, now)?.let { result ->
-            result[StepsRecord.COUNT_TOTAL]?.let {
-                editor.putInt(KEY_STEPS, it.toInt())
-                any = true
-            }
+        val aggregatedSteps = aggregateOrNull(client, setOf(StepsRecord.COUNT_TOTAL), dayStart, now)
+            ?.get(StepsRecord.COUNT_TOTAL)
+        // The aggregate honours Health Connect's per-type source priority list, and a source that
+        // isn't on it contributes nothing — which reads as 0 even while the watch is syncing.
+        // Fall back to the raw records, taking the largest single source so a phone and a watch
+        // counting the same walk aren't added together.
+        val steps = aggregatedSteps?.takeIf { it > 0 } ?: largestStepSource(client, dayStart, now)
+        if (steps != null) {
+            editor.putInt(KEY_STEPS, steps.toInt())
+            any = true
         }
 
         aggregateOrNull(client, setOf(SleepSessionRecord.SLEEP_DURATION_TOTAL), nightStart, nightEnd)?.let { result ->
@@ -124,6 +130,30 @@ object HealthConnectRepository {
             editor.putLong(KEY_LAST_SYNC, now.toEpochMilli())
             editor.apply()
         }
+    }
+
+    private suspend fun largestStepSource(client: HealthConnectClient, start: Instant, end: Instant): Long? = try {
+        val totals = HashMap<String, Long>()
+        var pageToken: String? = null
+        var pages = 0
+        do {
+            val response = client.readRecords(
+                ReadRecordsRequest(
+                    recordType = StepsRecord::class,
+                    timeRangeFilter = TimeRangeFilter.between(start, end),
+                    pageToken = pageToken
+                )
+            )
+            for (record in response.records) {
+                val origin = record.metadata.dataOrigin.packageName
+                totals[origin] = (totals[origin] ?: 0L) + record.count
+            }
+            pageToken = response.pageToken
+            pages++
+        } while (pageToken != null && pages < 20)
+        totals.values.maxOrNull()
+    } catch (e: Exception) {
+        null
     }
 
     private suspend fun aggregateOrNull(

@@ -102,13 +102,12 @@
                 android:includeFontPadding="false" />
         </LinearLayout>
 
-        <!-- Bio cluster (Top Right): steps, screen time -->
+        <!-- Bio cluster (Top Right): two columns under a pulse icon -->
         <LinearLayout
             android:id="@+id/bio_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="end"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true">
 
@@ -152,148 +151,177 @@
                     android:importantForAccessibility="no" />
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/layout_steps"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:visibility="gone">
-
-                <ImageView
-                    android:id="@+id/icon_steps"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_marginEnd="6dp"
-                    android:src="@drawable/ic_steps"
-                    android:importantForAccessibility="no" />
-
-                <TextView
-                    android:id="@+id/text_steps"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:text="0"
-                    android:textColor="#CCFFFFFF"
-                    android:textSize="15sp"
-                    android:includeFontPadding="false" />
-            </LinearLayout>
+            <ImageView
+                android:id="@+id/icon_bio_header"
+                android:layout_width="11dp"
+                android:layout_height="11dp"
+                android:layout_marginBottom="5dp"
+                android:src="@drawable/ic_pulse"
+                android:importantForAccessibility="no" />
 
             <LinearLayout
-                android:id="@+id/layout_screen_time"
+                android:id="@+id/bio_columns"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginTop="4dp"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:visibility="gone">
+                android:baselineAligned="false">
 
-                <ImageView
-                    android:id="@+id/icon_screen_time"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_marginEnd="6dp"
-                    android:src="@drawable/ic_time"
-                    android:importantForAccessibility="no" />
-
-                <TextView
-                    android:id="@+id/text_screen_time"
+                <!-- Movement: steps, calories, resting heart rate -->
+                <LinearLayout
+                    android:id="@+id/bio_col_activity"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:text="0h 0m"
-                    android:textColor="#CCFFFFFF"
-                    android:textSize="15sp"
-                    android:includeFontPadding="false" />
-            </LinearLayout>
+                    android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/layout_sleep"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginTop="4dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:visibility="gone">
+                    <LinearLayout
+                        android:id="@+id/layout_steps"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:visibility="gone">
 
-                <ImageView
-                    android:id="@+id/icon_sleep"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_marginEnd="6dp"
-                    android:src="@drawable/ic_sleep"
-                    android:importantForAccessibility="no" />
+                        <ImageView
+                            android:id="@+id/icon_steps"
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/ic_steps"
+                            android:importantForAccessibility="no" />
 
-                <TextView
-                    android:id="@+id/text_sleep"
+                        <TextView
+                            android:id="@+id/text_steps"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="monospace"
+                            android:text="0"
+                            android:textColor="#CCFFFFFF"
+                            android:textSize="15sp"
+                            android:includeFontPadding="false" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/layout_calories"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/icon_calories"
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/ic_flame"
+                            android:importantForAccessibility="no" />
+
+                        <TextView
+                            android:id="@+id/text_calories"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="monospace"
+                            android:text="--"
+                            android:textColor="#CCFFFFFF"
+                            android:textSize="15sp"
+                            android:includeFontPadding="false" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/layout_resting_hr"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/icon_resting_hr"
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/ic_heart"
+                            android:importantForAccessibility="no" />
+
+                        <TextView
+                            android:id="@+id/text_resting_hr"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="monospace"
+                            android:text="--"
+                            android:textColor="#CCFFFFFF"
+                            android:textSize="15sp"
+                            android:includeFontPadding="false" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Rest: screen time, sleep -->
+                <LinearLayout
+                    android:id="@+id/bio_col_rest"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:text="--"
-                    android:textColor="#CCFFFFFF"
-                    android:textSize="15sp"
-                    android:includeFontPadding="false" />
-            </LinearLayout>
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/layout_resting_hr"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginTop="4dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:visibility="gone">
+                    <LinearLayout
+                        android:id="@+id/layout_screen_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:visibility="gone">
 
-                <ImageView
-                    android:id="@+id/icon_resting_hr"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_marginEnd="6dp"
-                    android:src="@drawable/ic_heart"
-                    android:importantForAccessibility="no" />
+                        <ImageView
+                            android:id="@+id/icon_screen_time"
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/ic_time"
+                            android:importantForAccessibility="no" />
 
-                <TextView
-                    android:id="@+id/text_resting_hr"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:text="--"
-                    android:textColor="#CCFFFFFF"
-                    android:textSize="15sp"
-                    android:includeFontPadding="false" />
-            </LinearLayout>
+                        <TextView
+                            android:id="@+id/text_screen_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="monospace"
+                            android:text="0h 0m"
+                            android:textColor="#CCFFFFFF"
+                            android:textSize="15sp"
+                            android:includeFontPadding="false" />
+                    </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/layout_calories"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginTop="4dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:visibility="gone">
+                    <LinearLayout
+                        android:id="@+id/layout_sleep"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:visibility="gone">
 
-                <ImageView
-                    android:id="@+id/icon_calories"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_marginEnd="6dp"
-                    android:src="@drawable/ic_flame"
-                    android:importantForAccessibility="no" />
+                        <ImageView
+                            android:id="@+id/icon_sleep"
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/ic_sleep"
+                            android:importantForAccessibility="no" />
 
-                <TextView
-                    android:id="@+id/text_calories"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:text="--"
-                    android:textColor="#CCFFFFFF"
-                    android:textSize="15sp"
-                    android:includeFontPadding="false" />
+                        <TextView
+                            android:id="@+id/text_sleep"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="monospace"
+                            android:text="--"
+                            android:textColor="#CCFFFFFF"
+                            android:textSize="15sp"
+                            android:includeFontPadding="false" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
         </RelativeLayout>
