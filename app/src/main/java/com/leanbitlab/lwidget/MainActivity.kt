@@ -1633,7 +1633,8 @@ class MainActivity : AppCompatActivity() {
             isContent = true
         )
 
-        // Mutual Exclusion: Events vs Tasks
+        // Events and tasks used to share one list and were mutually exclusive; they now render
+        // side by side, so each toggle only controls itself.
         eventsSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
@@ -1642,8 +1643,7 @@ class MainActivity : AppCompatActivity() {
                     return@setOnCheckedChangeListener
                 }
                 if (checkLimit()) {
-                    tasksSwitch.isChecked = false
-                    prefs.edit().putBoolean("show_events", true).putBoolean("show_tasks", false).apply()
+                    prefs.edit().putBoolean("show_events", true).apply()
                     updateFeatureRowVisibility(eventsSwitch, true, R.id.row_events_size)
                     updateWidget()
                     updateToggleAvailability()
@@ -1678,8 +1678,7 @@ class MainActivity : AppCompatActivity() {
                     ActivityCompat.requestPermissions(this, arrayOf(AwidgetProvider.PERMISSION_READ_TASKS_ORG), 101)
                 }
                 if (checkLimit()) {
-                    eventsSwitch.isChecked = false
-                    prefs.edit().putBoolean("show_tasks", true).putBoolean("show_events", false).apply()
+                    prefs.edit().putBoolean("show_tasks", true).apply()
                     updateFeatureRowVisibility(tasksSwitch, true, R.id.row_tasks_size)
                     updateWidget()
                     updateToggleAvailability()
