@@ -161,17 +161,13 @@
                 android:gravity="center_vertical"
                 android:visibility="gone">
 
-                <TextView
-                    android:id="@+id/label_move"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:letterSpacing="0.13"
-                    android:text="@string/bp_label_move"
-                    android:textColor="#99FFFFFF"
-                    android:textSize="8sp"
-                    android:layout_marginEnd="7dp"
-                    android:includeFontPadding="false" />
+                <ImageView
+                    android:id="@+id/icon_steps"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_steps"
+                    android:importantForAccessibility="no" />
 
                 <TextView
                     android:id="@+id/text_steps"
@@ -182,15 +178,6 @@
                     android:textColor="#CCFFFFFF"
                     android:textSize="15sp"
                     android:includeFontPadding="false" />
-
-                <ImageView
-                    android:id="@+id/icon_steps"
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:layout_marginStart="3dp"
-                    android:src="@drawable/ic_steps"
-                    android:visibility="gone"
-                    android:importantForAccessibility="no" />
             </LinearLayout>
 
             <LinearLayout
@@ -203,17 +190,13 @@
                 android:gravity="center_vertical"
                 android:visibility="gone">
 
-                <TextView
-                    android:id="@+id/label_scrn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:letterSpacing="0.13"
-                    android:text="@string/bp_label_scrn"
-                    android:textColor="#99FFFFFF"
-                    android:textSize="8sp"
-                    android:layout_marginEnd="7dp"
-                    android:includeFontPadding="false" />
+                <ImageView
+                    android:id="@+id/icon_screen_time"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_time"
+                    android:importantForAccessibility="no" />
 
                 <TextView
                     android:id="@+id/text_screen_time"
@@ -224,15 +207,6 @@
                     android:textColor="#CCFFFFFF"
                     android:textSize="15sp"
                     android:includeFontPadding="false" />
-
-                <ImageView
-                    android:id="@+id/icon_screen_time"
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:layout_marginStart="3dp"
-                    android:src="@drawable/ic_time"
-                    android:visibility="gone"
-                    android:importantForAccessibility="no" />
             </LinearLayout>
         </LinearLayout>
         </RelativeLayout>
@@ -359,6 +333,7 @@
             android:id="@+id/sys_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:orientation="vertical">
 
             <ImageView

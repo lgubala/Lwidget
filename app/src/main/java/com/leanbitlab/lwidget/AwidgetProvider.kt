@@ -528,14 +528,12 @@ class AwidgetProvider : AppWidgetProvider() {
                 if (showStorage) updateStorageStats(tickViews, prefs)
                 if (showRam) updateRamStats(context, tickViews, prefs)
                 return tickViews
-            } else if (mode == UpdateMode.CALENDAR_ONLY) {
-                val calViews = RemoteViews(context.packageName, layoutId)
-                if (showEvents) loadCalendarEvents(context, calViews, sizeEvents, primaryColor, secondaryColor, prefs)
-                return calViews
-            } else if (mode == UpdateMode.TASKS_ONLY) {
-                val taskViews = RemoteViews(context.packageName, layoutId)
-                if (showTasks) loadTasks(context, taskViews, sizeTasks, primaryColor)
-                return taskViews
+            } else if (mode == UpdateMode.CALENDAR_ONLY || mode == UpdateMode.TASKS_ONLY) {
+                // Both share the same text slots, so a partial update has to redraw the pair
+                // or whichever one ran last would wipe the other.
+                val agendaViews = RemoteViews(context.packageName, layoutId)
+                renderAgenda(context, agendaViews, prefs, showEvents, sizeEvents, showTasks, sizeTasks, primaryColor, secondaryColor)
+                return agendaViews
             } else if (mode == UpdateMode.ALARM_ONLY) {
                 val alarmViews = RemoteViews(context.packageName, layoutId)
                 if (showNextAlarm) loadNextAlarm(context, alarmViews, sizeNextAlarm, secondaryColor, prefs, showDate || showWorldClock)
@@ -889,8 +887,13 @@ class AwidgetProvider : AppWidgetProvider() {
 
                 // Top-right cluster stacks naturally; nudge it down to sit under the widget padding
                 views.setViewPadding(R.id.bio_container, 0, maxOf(0, dpToPx(paddingVal - 2f)), 0, 0)
-                views.setTextColor(R.id.label_move, labelColor)
-                views.setTextColor(R.id.label_scrn, labelColor)
+
+                // With an agenda on screen the sys row follows the content; without one it drops
+                // to the bottom edge so the widget doesn't look top-heavy.
+                views.setViewVisibility(
+                    R.id.bp_spacer,
+                    if (showEvents || showTasks) android.view.View.GONE else android.view.View.VISIBLE
+                )
 
                 // Bottom system row
                 val sysCells = listOf(
@@ -963,11 +966,7 @@ class AwidgetProvider : AppWidgetProvider() {
             // --- Calendar Events OR Tasks ---
             views.setViewVisibility(R.id.events_container, if (showEvents || showTasks) android.view.View.VISIBLE else android.view.View.GONE)
             
-            if (showEvents) {
-                loadCalendarEvents(context, views, sizeEvents, primaryColor, secondaryColor, prefs)
-            } else if (showTasks) {
-                loadTasks(context, views, sizeTasks, primaryColor)
-            }
+            renderAgenda(context, views, prefs, showEvents, sizeEvents, showTasks, sizeTasks, primaryColor, secondaryColor)
 
             // --- Next Alarm ---
             views.setViewVisibility(R.id.layout_next_alarm, if (showNextAlarm) android.view.View.VISIBLE else android.view.View.GONE)
@@ -1160,7 +1159,8 @@ class AwidgetProvider : AppWidgetProvider() {
             return events
         }
 
-        private fun bindCalendarEvents(context: Context, views: RemoteViews, events: List<EventInfo>, textSizeSp: Float, primaryColor: Int, secondaryColor: Int, eventViews: List<Int>, prefs: SharedPreferences) {
+        /** Returns the number of slots filled. */
+        private fun bindCalendarEvents(context: Context, views: RemoteViews, events: List<EventInfo>, textSizeSp: Float, primaryColor: Int, secondaryColor: Int, eventViews: List<Int>, prefs: SharedPreferences): Int {
             val showDayAbbr = prefs.getBoolean("show_day_abbr_in_events", true)
 
             if (events.isEmpty()) {
@@ -1168,14 +1168,11 @@ class AwidgetProvider : AppWidgetProvider() {
                 views.setTextColor(eventViews[0], secondaryColor)
                 views.setTextViewTextSize(eventViews[0], android.util.TypedValue.COMPLEX_UNIT_SP, textSizeSp)
                 views.setViewVisibility(eventViews[0], android.view.View.VISIBLE)
-                
+
                 val emptyIntent = PendingIntent.getActivity(context, 0, Intent(), PendingIntent.FLAG_IMMUTABLE)
                 views.setOnClickPendingIntent(eventViews[0], emptyIntent)
 
-                for (i in 1 until eventViews.size) {
-                    views.setViewVisibility(eventViews[i], android.view.View.GONE)
-                }
-                return
+                return 1
             }
 
             val today = LocalDate.now()
@@ -1200,35 +1197,57 @@ class AwidgetProvider : AppWidgetProvider() {
                     }
                     val eventPendingIntent = PendingIntent.getActivity(context, event.id.toInt(), eventIntent, PendingIntent.FLAG_IMMUTABLE)
                     views.setOnClickPendingIntent(eventViews[i], eventPendingIntent)
-                } else {
-                    views.setViewVisibility(eventViews[i], android.view.View.GONE)
                 }
+            }
+            return minOf(events.size, eventViews.size)
+        }
+
+        /** Text slots shared by calendar events and tasks. */
+        private val agendaSlots = listOf(
+            R.id.text_event_1, R.id.text_event_2, R.id.text_event_3,
+            R.id.text_event_4, R.id.text_event_5, R.id.text_event_6,
+            R.id.text_event_7, R.id.text_event_8, R.id.text_event_9,
+            R.id.text_event_10
+        )
+
+        /**
+         * Events and tasks share one set of text slots, so they have to be rendered together:
+         * events first, then tasks in whatever slots are left.
+         */
+        private fun renderAgenda(
+            context: Context, views: RemoteViews, prefs: SharedPreferences,
+            showEvents: Boolean, sizeEvents: Float,
+            showTasks: Boolean, sizeTasks: Float,
+            primaryColor: Int, secondaryColor: Int
+        ) {
+            var used = 0
+            if (showEvents) {
+                used += loadCalendarEvents(context, views, sizeEvents, primaryColor, secondaryColor, prefs, agendaSlots)
+            }
+            if (showTasks) {
+                used += loadTasks(context, views, sizeTasks, primaryColor, agendaSlots.drop(used))
+            }
+            for (i in used until agendaSlots.size) {
+                views.setViewVisibility(agendaSlots[i], android.view.View.GONE)
             }
         }
 
-        private fun loadCalendarEvents(context: Context, views: RemoteViews, textSizeSp: Float, primaryColor: Int, secondaryColor: Int, prefs: SharedPreferences) {
+        /** Returns the number of slots filled. */
+        private fun loadCalendarEvents(context: Context, views: RemoteViews, textSizeSp: Float, primaryColor: Int, secondaryColor: Int, prefs: SharedPreferences, eventViews: List<Int>): Int {
+            if (eventViews.isEmpty()) return 0
             if (androidx.core.content.ContextCompat.checkSelfPermission(
                     context, android.Manifest.permission.READ_CALENDAR
                 ) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                return
+                return 0
             }
 
-            val eventViews = listOf(
-                R.id.text_event_1, R.id.text_event_2, R.id.text_event_3,
-                R.id.text_event_4, R.id.text_event_5, R.id.text_event_6,
-                R.id.text_event_7, R.id.text_event_8, R.id.text_event_9,
-                R.id.text_event_10
-            )
-
-            try {
+            return try {
                 val events = fetchCalendarEvents(context)
                 bindCalendarEvents(context, views, events, textSizeSp, primaryColor, secondaryColor, eventViews, prefs)
             } catch (e: Exception) {
                 // Log and gracefully handle crash
                 android.util.Log.e("LWidget", "Error loading calendar events", e)
-                for (viewId in eventViews) {
-                    views.setViewVisibility(viewId, android.view.View.GONE)
-                }
+                0
             }
         }
 
@@ -1379,37 +1398,29 @@ class AwidgetProvider : AppWidgetProvider() {
             }
         }
 
-        private fun loadTasks(context: Context, views: RemoteViews, textSizeSp: Float, primaryColor: Int) {
-            val eventViews = listOf(
-                R.id.text_event_1, R.id.text_event_2, R.id.text_event_3,
-                R.id.text_event_4, R.id.text_event_5, R.id.text_event_6,
-                R.id.text_event_7, R.id.text_event_8, R.id.text_event_9,
-                R.id.text_event_10
-            )
-            
+        /** Returns the number of slots filled. */
+        private fun loadTasks(context: Context, views: RemoteViews, textSizeSp: Float, primaryColor: Int, eventViews: List<Int>): Int {
+            if (eventViews.isEmpty()) return 0
+
             // Debugging: Check permission again contextually
             val hasPerm = context.checkSelfPermission(PERMISSION_READ_TASKS_ORG) == android.content.pm.PackageManager.PERMISSION_GRANTED ||
                           context.checkSelfPermission(PERMISSION_READ_TASKS_ASTRID) == android.content.pm.PackageManager.PERMISSION_GRANTED
-            
+
             if (!hasPerm) {
                  views.setTextViewText(eventViews[0], "Missing Permission")
+                 views.setTextColor(eventViews[0], primaryColor)
+                 views.setTextViewTextSize(eventViews[0], android.util.TypedValue.COMPLEX_UNIT_SP, textSizeSp)
                  views.setViewVisibility(eventViews[0], android.view.View.VISIBLE)
-                 for (j in 1 until eventViews.size) {
-                     views.setViewVisibility(eventViews[j], android.view.View.GONE)
-                 }
-                 return
+                 return 1
             }
 
             val tasks = fetchActiveTasks(context, eventViews.size)
 
             if (tasks.isEmpty()) {
-                for (viewId in eventViews) {
-                    views.setViewVisibility(viewId, android.view.View.GONE)
-                }
-                return
+                return 0
             }
 
-            for (i in tasks.indices) {
+            for (i in 0 until minOf(tasks.size, eventViews.size)) {
                 val task = tasks[i]
                 val dueSuffix = formatDueSuffix(task.dueMillis)
                 val fullText = "• ${task.title}$dueSuffix"
@@ -1429,9 +1440,7 @@ class AwidgetProvider : AppWidgetProvider() {
                 }
             }
 
-            for (j in tasks.size until eventViews.size) {
-                views.setViewVisibility(eventViews[j], android.view.View.GONE)
-            }
+            return minOf(tasks.size, eventViews.size)
         }
 
         private fun loadWorldClock(views: RemoteViews, textSizeSp: Float, textColor: Int, zoneIdStr: String, is12Hour: Boolean) {

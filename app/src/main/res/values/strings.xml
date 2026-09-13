@@ -106,8 +106,6 @@
     <string name="bp_label_disk">DISK</string>
     <string name="bp_label_net">NET</string>
     <string name="bp_label_ram">RAM</string>
-    <string name="bp_label_move">MOVE</string>
-    <string name="bp_label_scrn">SCRN</string>
     <string name="color_default">Default</string>
     <string name="color_system_accent">System Accent</string>
     <string name="color_custom">Custom</string>

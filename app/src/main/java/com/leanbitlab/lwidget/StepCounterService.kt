@@ -27,15 +27,29 @@ class StepCounterService : Service(), SensorEventListener {
     private var baselineSteps: Float = 0f
     private var stepDate: String = ""
 
+    private var lastBatteryPct = -1
+
     private val updateReceiver = object : android.content.BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val action = intent.action
-            if (action == Intent.ACTION_BATTERY_CHANGED || action == Intent.ACTION_TIME_TICK) {
-                val updateIntent = Intent(context, AwidgetProvider::class.java).apply {
-                    this.action = AwidgetProvider.ACTION_BATTERY_UPDATE
+            when (intent.action) {
+                Intent.ACTION_BATTERY_CHANGED -> {
+                    // This fires on every voltage/temperature tick — several times a minute — and
+                    // each one used to rebuild the whole widget. Only the percentage is displayed,
+                    // so redraw when that actually moves.
+                    val level = intent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1)
+                    val scale = intent.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1)
+                    if (level < 0 || scale <= 0) return
+                    val pct = level * 100 / scale
+                    if (pct == lastBatteryPct) return
+                    lastBatteryPct = pct
                 }
-                context.sendBroadcast(updateIntent)
+                Intent.ACTION_TIME_TICK -> {}
+                else -> return
             }
+            val updateIntent = Intent(context, AwidgetProvider::class.java).apply {
+                this.action = AwidgetProvider.ACTION_BATTERY_UPDATE
+            }
+            context.sendBroadcast(updateIntent)
         }
     }
     
