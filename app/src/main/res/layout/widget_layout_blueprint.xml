@@ -303,21 +303,60 @@
             android:id="@+id/events_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:layout_marginTop="8dp"
+            android:baselineAligned="false"
             android:clipChildren="true"
             android:clipToPadding="true">
 
-            <TextView android:id="@+id/text_event_1" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
-            <TextView android:id="@+id/text_event_2" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
-            <TextView android:id="@+id/text_event_3" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
-            <TextView android:id="@+id/text_event_4" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
-            <TextView android:id="@+id/text_event_5" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
-            <TextView android:id="@+id/text_event_6" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
-            <TextView android:id="@+id/text_event_7" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
-            <TextView android:id="@+id/text_event_8" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
-            <TextView android:id="@+id/text_event_9" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
-            <TextView android:id="@+id/text_event_10" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+            <!-- Tasks (left) -->
+            <LinearLayout
+                android:id="@+id/tasks_column"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="12dp"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/icon_tasks_header"
+                    android:layout_width="11dp"
+                    android:layout_height="11dp"
+                    android:layout_marginBottom="4dp"
+                    android:src="@drawable/ic_tasks"
+                    android:importantForAccessibility="no" />
+
+                <TextView android:id="@+id/text_task_1" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+                <TextView android:id="@+id/text_task_2" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+                <TextView android:id="@+id/text_task_3" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+                <TextView android:id="@+id/text_task_4" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+                <TextView android:id="@+id/text_task_5" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+                <TextView android:id="@+id/text_task_6" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+            </LinearLayout>
+
+            <!-- Calendar (right) -->
+            <LinearLayout
+                android:id="@+id/events_column"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/icon_events_header"
+                    android:layout_width="11dp"
+                    android:layout_height="11dp"
+                    android:layout_marginBottom="4dp"
+                    android:src="@drawable/ic_events"
+                    android:importantForAccessibility="no" />
+
+                <TextView android:id="@+id/text_event_1" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+                <TextView android:id="@+id/text_event_2" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+                <TextView android:id="@+id/text_event_3" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+                <TextView android:id="@+id/text_event_4" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+                <TextView android:id="@+id/text_event_5" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+                <TextView android:id="@+id/text_event_6" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+            </LinearLayout>
         </LinearLayout>
 
         <!-- Takes up the slack so the sys cluster stays pinned to the bottom edge -->

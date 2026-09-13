@@ -532,7 +532,7 @@ class AwidgetProvider : AppWidgetProvider() {
                 // Both share the same text slots, so a partial update has to redraw the pair
                 // or whichever one ran last would wipe the other.
                 val agendaViews = RemoteViews(context.packageName, layoutId)
-                renderAgenda(context, agendaViews, prefs, showEvents, sizeEvents, showTasks, sizeTasks, primaryColor, secondaryColor)
+                renderAgenda(context, agendaViews, prefs, showEvents, sizeEvents, showTasks, sizeTasks, primaryColor, secondaryColor, isBlueprint)
                 return agendaViews
             } else if (mode == UpdateMode.ALARM_ONLY) {
                 val alarmViews = RemoteViews(context.packageName, layoutId)
@@ -895,6 +895,9 @@ class AwidgetProvider : AppWidgetProvider() {
                     if (showEvents || showTasks) android.view.View.GONE else android.view.View.VISIBLE
                 )
 
+                views.setInt(R.id.icon_tasks_header, "setColorFilter", labelColor)
+                views.setInt(R.id.icon_events_header, "setColorFilter", labelColor)
+
                 // Bottom system row
                 val sysCells = listOf(
                     Triple(R.id.cell_batt, showBattery, R.id.label_batt),
@@ -966,7 +969,7 @@ class AwidgetProvider : AppWidgetProvider() {
             // --- Calendar Events OR Tasks ---
             views.setViewVisibility(R.id.events_container, if (showEvents || showTasks) android.view.View.VISIBLE else android.view.View.GONE)
             
-            renderAgenda(context, views, prefs, showEvents, sizeEvents, showTasks, sizeTasks, primaryColor, secondaryColor)
+            renderAgenda(context, views, prefs, showEvents, sizeEvents, showTasks, sizeTasks, primaryColor, secondaryColor, isBlueprint)
 
             // --- Next Alarm ---
             views.setViewVisibility(R.id.layout_next_alarm, if (showNextAlarm) android.view.View.VISIBLE else android.view.View.GONE)
@@ -1210,6 +1213,42 @@ class AwidgetProvider : AppWidgetProvider() {
             R.id.text_event_10
         )
 
+        /** Task-only slots, used when the agenda is laid out as two columns. */
+        private val taskSlots = listOf(
+            R.id.text_task_1, R.id.text_task_2, R.id.text_task_3,
+            R.id.text_task_4, R.id.text_task_5, R.id.text_task_6
+        )
+
+        /**
+         * One column each for tasks and events, so a full task list no longer pushes the day's
+         * events out of a two-row-tall widget.
+         */
+        private fun renderAgendaColumns(
+            context: Context, views: RemoteViews, prefs: SharedPreferences,
+            showEvents: Boolean, sizeEvents: Float,
+            showTasks: Boolean, sizeTasks: Float,
+            primaryColor: Int, secondaryColor: Int
+        ) {
+            val eventSlots = agendaSlots.take(taskSlots.size)
+
+            views.setViewVisibility(R.id.events_column, if (showEvents) android.view.View.VISIBLE else android.view.View.GONE)
+            views.setViewVisibility(R.id.tasks_column, if (showTasks) android.view.View.VISIBLE else android.view.View.GONE)
+
+            val eventsUsed = if (showEvents) {
+                loadCalendarEvents(context, views, sizeEvents, primaryColor, secondaryColor, prefs, eventSlots)
+            } else 0
+            for (i in eventsUsed until agendaSlots.size) {
+                views.setViewVisibility(agendaSlots[i], android.view.View.GONE)
+            }
+
+            val tasksUsed = if (showTasks) {
+                loadTasks(context, views, sizeTasks, primaryColor, taskSlots)
+            } else 0
+            for (i in tasksUsed until taskSlots.size) {
+                views.setViewVisibility(taskSlots[i], android.view.View.GONE)
+            }
+        }
+
         /**
          * Events and tasks share one set of text slots, so they have to be rendered together:
          * events first, then tasks in whatever slots are left.
@@ -1218,8 +1257,14 @@ class AwidgetProvider : AppWidgetProvider() {
             context: Context, views: RemoteViews, prefs: SharedPreferences,
             showEvents: Boolean, sizeEvents: Float,
             showTasks: Boolean, sizeTasks: Float,
-            primaryColor: Int, secondaryColor: Int
+            primaryColor: Int, secondaryColor: Int,
+            splitColumns: Boolean
         ) {
+            if (splitColumns) {
+                renderAgendaColumns(context, views, prefs, showEvents, sizeEvents, showTasks, sizeTasks, primaryColor, secondaryColor)
+                return
+            }
+
             var used = 0
             if (showEvents) {
                 used += loadCalendarEvents(context, views, sizeEvents, primaryColor, secondaryColor, prefs, agendaSlots)
