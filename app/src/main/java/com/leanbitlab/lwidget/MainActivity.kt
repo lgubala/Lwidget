@@ -1684,7 +1684,8 @@ class MainActivity : AppCompatActivity() {
         bindSelector(R.id.row_font, getString(R.string.section_font), "font_style", listOf(
             getString(R.string.font_default), getString(R.string.font_serif), getString(R.string.font_monospace), getString(R.string.font_cursive),
             getString(R.string.font_condensed), getString(R.string.font_condensed_light), getString(R.string.font_light), getString(R.string.font_medium),
-            getString(R.string.font_black), getString(R.string.font_thin), getString(R.string.font_smallcaps)
+            getString(R.string.font_black), getString(R.string.font_thin), getString(R.string.font_smallcaps),
+            getString(R.string.font_blueprint)
         ), 0)
 
         updateToggleAvailability()
@@ -1797,6 +1798,25 @@ class MainActivity : AppCompatActivity() {
                 "date_color_idx" to 2, "date_color_r" to 200, "date_color_g" to 200, "date_color_b" to 200,
                 "outline_color_idx" to 2, "outline_color_r" to 100, "outline_color_g" to 100, "outline_color_b" to 100,
                 "bg_color_idx" to 2, "bg_color_r" to 25, "bg_color_g" to 25, "bg_color_b" to 25
+            )),
+            // Blueprint: HUD dashboard — steps/screen time top right, system metrics in a labelled bottom row
+            Preset("blueprint", getString(R.string.preset_blueprint), mapOf(
+                "font_style" to 11, // Blueprint
+                "show_outline" to true, "bg_opacity" to 0f,
+                "widget_padding" to 20f,
+                "use_dynamic_colors" to false,
+                "show_battery" to true, "show_storage" to true, "show_ram" to true, "show_data_usage" to true,
+                "show_steps" to true, "show_screen_time" to true,
+                "show_time" to true, "show_date" to true,
+                "date_format_idx" to 1, // Sun, Sep 13
+                "bold_battery" to false, "bold_storage" to false, "bold_ram" to false, "bold_data_usage" to false,
+                "size_time" to 42f, "size_date" to 14f,
+                "size_battery" to 13f, "size_storage" to 13f, "size_data" to 13f, "size_ram" to 13f,
+                "size_steps" to 15f, "size_screen_time" to 15f,
+                "text_color_primary_idx" to 2, "text_color_primary_r" to 242, "text_color_primary_g" to 242, "text_color_primary_b" to 242,
+                "text_color_secondary_idx" to 2, "text_color_secondary_r" to 169, "text_color_secondary_g" to 171, "text_color_secondary_b" to 175,
+                "date_color_idx" to 2, "date_color_r" to 169, "date_color_g" to 171, "date_color_b" to 175,
+                "outline_color_idx" to 2, "outline_color_r" to 242, "outline_color_g" to 242, "outline_color_b" to 242
             )),
             // Snowfall: icy blues, light font, airy feel
             Preset("snowfall", getString(R.string.preset_snowfall), mapOf(

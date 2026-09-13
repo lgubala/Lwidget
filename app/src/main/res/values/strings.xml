@@ -99,6 +99,15 @@
     <string name="font_black">Black</string>
     <string name="font_thin">Thin</string>
     <string name="font_smallcaps">Small Caps</string>
+    <string name="font_blueprint">Blueprint</string>
+    <string name="preset_blueprint">Blueprint</string>
+    <string name="bp_label_sys">SYS</string>
+    <string name="bp_label_batt">BATT</string>
+    <string name="bp_label_disk">DISK</string>
+    <string name="bp_label_net">NET</string>
+    <string name="bp_label_ram">RAM</string>
+    <string name="bp_label_move">MOVE</string>
+    <string name="bp_label_scrn">SCRN</string>
     <string name="color_default">Default</string>
     <string name="color_system_accent">System Accent</string>
     <string name="color_custom">Custom</string>

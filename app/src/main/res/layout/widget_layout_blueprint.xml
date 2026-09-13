@@ -1,0 +1,518 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/widget_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/widget_bg_fill"
+        android:importantForAccessibility="no" />
+
+    <ImageView
+        android:id="@+id/widget_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bp_grid_tile"
+        android:importantForAccessibility="no" />
+
+    <ImageView
+        android:id="@+id/widget_outline"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/widget_bg_outline"
+        android:visibility="gone"
+        android:importantForAccessibility="no" />
+
+    <!-- HUD corner brackets -->
+    <ImageView
+        android:id="@+id/bp_corner_tl"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="6dp"
+        android:src="@drawable/bp_corner_tl"
+        android:importantForAccessibility="no" />
+
+    <ImageView
+        android:id="@+id/bp_corner_tr"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="6dp"
+        android:src="@drawable/bp_corner_tr"
+        android:importantForAccessibility="no" />
+
+    <ImageView
+        android:id="@+id/bp_corner_bl"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="6dp"
+        android:src="@drawable/bp_corner_bl"
+        android:importantForAccessibility="no" />
+
+    <ImageView
+        android:id="@+id/bp_corner_br"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="6dp"
+        android:src="@drawable/bp_corner_br"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:id="@+id/inner_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="0dp">
+
+        <!-- Header: time on the left, activity cluster on the right -->
+        <RelativeLayout
+            android:id="@+id/header_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <!-- Time (Top Left) -->
+        <LinearLayout
+            android:id="@+id/time_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:gravity="center_vertical">
+
+            <TextClock
+                android:id="@+id/clock_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:format12Hour="h:mm"
+                android:format24Hour="H:mm"
+                android:textSize="46sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:includeFontPadding="false" />
+        </LinearLayout>
+
+        <!-- Bio cluster (Top Right): steps, screen time -->
+        <LinearLayout
+            android:id="@+id/bio_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="end"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true">
+
+            <TextView
+                android:id="@+id/text_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:fontFamily="monospace"
+                android:text="--°C"
+                android:textColor="#CCFFFFFF"
+                android:textSize="15sp"
+                android:includeFontPadding="false"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/layout_weather_condition"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/text_weather_condition"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text=""
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="15sp"
+                    android:includeFontPadding="false" />
+
+                <ImageView
+                    android:id="@+id/icon_weather"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/ic_weather_sunny"
+                    android:importantForAccessibility="no" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_steps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/label_move"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.13"
+                    android:text="@string/bp_label_move"
+                    android:textColor="#99FFFFFF"
+                    android:textSize="8sp"
+                    android:layout_marginEnd="7dp"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:id="@+id/text_steps"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="0"
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="15sp"
+                    android:includeFontPadding="false" />
+
+                <ImageView
+                    android:id="@+id/icon_steps"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="3dp"
+                    android:src="@drawable/ic_steps"
+                    android:visibility="gone"
+                    android:importantForAccessibility="no" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_screen_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/label_scrn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.13"
+                    android:text="@string/bp_label_scrn"
+                    android:textColor="#99FFFFFF"
+                    android:textSize="8sp"
+                    android:layout_marginEnd="7dp"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:id="@+id/text_screen_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="0h 0m"
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="15sp"
+                    android:includeFontPadding="false" />
+
+                <ImageView
+                    android:id="@+id/icon_screen_time"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="3dp"
+                    android:src="@drawable/ic_time"
+                    android:visibility="gone"
+                    android:importantForAccessibility="no" />
+            </LinearLayout>
+        </LinearLayout>
+        </RelativeLayout>
+
+        <!-- Date (Below Time) -->
+        <LinearLayout
+            android:id="@+id/date_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextClock
+                android:id="@+id/clock_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:format12Hour="EEE MM.dd"
+                android:format24Hour="EEE MM.dd"
+                android:letterSpacing="0.06"
+                android:textSize="14sp"
+                android:textColor="#CCFFFFFF" />
+
+            <LinearLayout
+                android:id="@+id/layout_world_clock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginStart="8dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/icon_world_clock"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/ic_world"
+                    android:layout_marginEnd="4dp"
+                    android:importantForAccessibility="no" />
+
+                <TextView
+                    android:id="@+id/text_world_clock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text=""
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="14sp"
+                    android:includeFontPadding="false" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_next_alarm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginStart="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/text_alarm_divider"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="|"
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="14sp"
+                    android:includeFontPadding="false"
+                    android:layout_marginEnd="6dp" />
+
+                <ImageView
+                    android:id="@+id/icon_next_alarm"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/ic_alarm"
+                    android:layout_marginEnd="4dp"
+                    android:importantForAccessibility="no" />
+
+                <TextView
+                    android:id="@+id/text_next_alarm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text=""
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="14sp"
+                    android:includeFontPadding="false" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Calendar Events (dynamically filled) — absorbs the space between date and sys row -->
+        <LinearLayout
+            android:id="@+id/events_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:clipChildren="true"
+            android:clipToPadding="true">
+
+            <TextView android:id="@+id/text_event_1" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+            <TextView android:id="@+id/text_event_2" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+            <TextView android:id="@+id/text_event_3" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+            <TextView android:id="@+id/text_event_4" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+            <TextView android:id="@+id/text_event_5" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+            <TextView android:id="@+id/text_event_6" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+            <TextView android:id="@+id/text_event_7" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+            <TextView android:id="@+id/text_event_8" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+            <TextView android:id="@+id/text_event_9" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+            <TextView android:id="@+id/text_event_10" style="@style/EventText" android:fontFamily="monospace" android:visibility="gone"/>
+        </LinearLayout>
+
+        <!-- Takes up the slack so the sys cluster stays pinned to the bottom edge -->
+        <TextView
+            android:id="@+id/bp_spacer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:importantForAccessibility="no" />
+
+        <!-- Sys cluster (Bottom): battery, disk, net, ram -->
+        <LinearLayout
+            android:id="@+id/sys_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/sys_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#33FFFFFF"
+                android:importantForAccessibility="no" />
+
+            <TextView
+                android:id="@+id/sys_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.14"
+                android:text="@string/bp_label_sys"
+                android:textColor="#99FFFFFF"
+                android:textSize="8sp"
+                android:includeFontPadding="false" />
+
+            <LinearLayout
+                android:id="@+id/sys_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+
+                <LinearLayout
+                    android:id="@+id/cell_batt"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/label_batt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.13"
+                        android:text="@string/bp_label_batt"
+                        android:textColor="#99FFFFFF"
+                        android:textSize="8sp"
+                        android:includeFontPadding="false" />
+
+                    <TextView
+                        android:id="@+id/text_battery"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:fontFamily="monospace"
+                        android:text="--%"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/cell_disk"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/label_disk"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.13"
+                        android:text="@string/bp_label_disk"
+                        android:textColor="#99FFFFFF"
+                        android:textSize="8sp"
+                        android:includeFontPadding="false" />
+
+                    <TextView
+                        android:id="@+id/text_storage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:fontFamily="monospace"
+                        android:text=""
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/cell_net"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/label_net"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.13"
+                        android:text="@string/bp_label_net"
+                        android:textColor="#99FFFFFF"
+                        android:textSize="8sp"
+                        android:includeFontPadding="false" />
+
+                    <TextView
+                        android:id="@+id/text_data_usage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:fontFamily="monospace"
+                        android:text="-- MB"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/cell_ram"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/label_ram"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.13"
+                        android:text="@string/bp_label_ram"
+                        android:textColor="#99FFFFFF"
+                        android:textSize="8sp"
+                        android:includeFontPadding="false" />
+
+                    <TextView
+                        android:id="@+id/text_ram"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:fontFamily="monospace"
+                        android:text=""
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>

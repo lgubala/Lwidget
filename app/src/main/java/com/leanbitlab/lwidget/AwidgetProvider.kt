@@ -360,11 +360,15 @@ class AwidgetProvider : AppWidgetProvider() {
                      8 -> R.layout.widget_layout_black
                      9 -> R.layout.widget_layout_thin
                      10 -> R.layout.widget_layout_smallcaps
+                     11 -> R.layout.widget_layout_blueprint
                      else -> R.layout.widget_layout
                  }
             }
 
             val layoutId = getLayout(fontStyle)
+            // Blueprint is a layout variant, not just a typeface: system metrics move into a
+            // labelled bottom row and steps/screen time take the top-right corner.
+            val isBlueprint = fontStyle == 11
 
             val views = RemoteViews(context.packageName, layoutId)
 
@@ -837,6 +841,9 @@ class AwidgetProvider : AppWidgetProvider() {
             var currentTextY = paddingVal
             var isFirstVisible = true
             for (entry in rightStack) {
+                // Blueprint stacks the top-right cluster with a real LinearLayout and puts the
+                // system metrics in the bottom row, so the cumulative padding math doesn't apply.
+                if (isBlueprint) break
                 if (entry.isVisible) {
                     val itemHeight = when {
                         entry.size >= 40f -> entry.size * 1.15f
@@ -851,6 +858,67 @@ class AwidgetProvider : AppWidgetProvider() {
                     val topPaddingPx = (topPaddingDp * rightDp).toInt()
                     views.setViewPadding(entry.viewId, 0, topPaddingPx, 0, 0)
                     currentTextY += itemHeight + 3f
+                }
+            }
+
+            // --- Blueprint dashboard ---
+            if (isBlueprint) {
+                fun withAlpha(color: Int, factor: Float): Int = android.graphics.Color.argb(
+                    (android.graphics.Color.alpha(color) * factor).toInt().coerceIn(0, 255),
+                    android.graphics.Color.red(color),
+                    android.graphics.Color.green(color),
+                    android.graphics.Color.blue(color)
+                )
+
+                val labelColor = withAlpha(secondaryColor, 0.6f)
+
+                // Corner brackets stand in for the rounded outline
+                views.setViewVisibility(R.id.widget_outline, android.view.View.GONE)
+                val bracketVisibility = if (showOutline) android.view.View.VISIBLE else android.view.View.GONE
+                for (cornerId in listOf(R.id.bp_corner_tl, R.id.bp_corner_tr, R.id.bp_corner_bl, R.id.bp_corner_br)) {
+                    views.setViewVisibility(cornerId, bracketVisibility)
+                    views.setInt(cornerId, "setColorFilter", outlineColor)
+                    views.setInt(cornerId, "setImageAlpha", 210)
+                }
+
+                views.setInt(
+                    R.id.widget_grid,
+                    "setBackgroundResource",
+                    if (useLightTheme) R.drawable.bp_grid_tile_dark else R.drawable.bp_grid_tile
+                )
+
+                // Top-right cluster stacks naturally; nudge it down to sit under the widget padding
+                views.setViewPadding(R.id.bio_container, 0, maxOf(0, dpToPx(paddingVal - 2f)), 0, 0)
+                views.setTextColor(R.id.label_move, labelColor)
+                views.setTextColor(R.id.label_scrn, labelColor)
+
+                // Bottom system row
+                val sysCells = listOf(
+                    Triple(R.id.cell_batt, showBattery, R.id.label_batt),
+                    Triple(R.id.cell_disk, showStorage, R.id.label_disk),
+                    Triple(R.id.cell_net, showData, R.id.label_net),
+                    Triple(R.id.cell_ram, showRam, R.id.label_ram)
+                )
+                for ((cellId, visible, labelId) in sysCells) {
+                    views.setViewVisibility(cellId, if (visible) android.view.View.VISIBLE else android.view.View.GONE)
+                    views.setTextColor(labelId, labelColor)
+                }
+
+                val sysVisible = sysCells.any { it.second }
+                views.setViewVisibility(R.id.sys_group, if (sysVisible) android.view.View.VISIBLE else android.view.View.GONE)
+                views.setTextColor(R.id.sys_label, labelColor)
+                views.setInt(R.id.sys_divider, "setBackgroundColor", withAlpha(secondaryColor, 0.22f))
+
+                // The row needs uniform, row-sized values regardless of the per-item size sliders
+                val sysValues = listOf(
+                    R.id.text_battery to sizeBattery,
+                    R.id.text_storage to sizeStorage,
+                    R.id.text_data_usage to sizeData,
+                    R.id.text_ram to sizeRam
+                )
+                for ((valueId, size) in sysValues) {
+                    views.setTextViewTextSize(valueId, android.util.TypedValue.COMPLEX_UNIT_SP, size.coerceIn(9f, 16f))
+                    views.setTextColor(valueId, primaryColor)
                 }
             }
 
