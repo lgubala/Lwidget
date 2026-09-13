@@ -116,6 +116,29 @@
                 android:resource="@xml/awidget_info" />
         </receiver>
 
+        <receiver
+            android:name=".media.MediaWidgetProvider"
+            android:label="@string/media_widget_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/media_widget_info" />
+        </receiver>
+
+        <!-- Needed only to see other apps' media sessions; notifications themselves are ignored -->
+        <service
+            android:name=".media.MediaListenerService"
+            android:label="@string/media_widget_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
         <service
             android:name=".StepCounterService"
             android:enabled="true"

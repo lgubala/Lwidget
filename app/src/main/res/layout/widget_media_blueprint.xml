@@ -1,0 +1,181 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/media_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/media_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bp_grid_tile"
+        android:importantForAccessibility="no" />
+
+    <ImageView
+        android:id="@+id/media_corner_tl"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="5dp"
+        android:src="@drawable/bp_corner_tl"
+        android:importantForAccessibility="no" />
+
+    <ImageView
+        android:id="@+id/media_corner_tr"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="5dp"
+        android:src="@drawable/bp_corner_tr"
+        android:importantForAccessibility="no" />
+
+    <ImageView
+        android:id="@+id/media_corner_bl"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="5dp"
+        android:src="@drawable/bp_corner_bl"
+        android:importantForAccessibility="no" />
+
+    <ImageView
+        android:id="@+id/media_corner_br"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="5dp"
+        android:src="@drawable/bp_corner_br"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:paddingStart="18dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false">
+
+            <!-- Source app, title, artist; tapping opens the player -->
+            <LinearLayout
+                android:id="@+id/media_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/media_app_icon"
+                        android:layout_width="9dp"
+                        android:layout_height="9dp"
+                        android:layout_marginEnd="5dp"
+                        android:src="@drawable/ic_music_note"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/media_app"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.13"
+                        android:maxLines="1"
+                        android:text="@string/media_label"
+                        android:textColor="#99FFFFFF"
+                        android:textSize="8sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/media_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="monospace"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:text="@string/media_nothing_playing"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:id="@+id/media_artist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:fontFamily="monospace"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:text=""
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="11sp"
+                    android:includeFontPadding="false" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/media_controls"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/media_prev"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_media_prev"
+                    android:contentDescription="@string/media_previous" />
+
+                <ImageView
+                    android:id="@+id/media_play"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_media_play"
+                    android:contentDescription="@string/media_play_pause" />
+
+                <ImageView
+                    android:id="@+id/media_next"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_media_next"
+                    android:contentDescription="@string/media_next" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/media_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="6dp"
+            android:minHeight="2dp"
+            android:maxHeight="2dp"
+            android:max="1000"
+            android:progress="0"
+            android:progressDrawable="@drawable/media_progress"
+            android:visibility="gone" />
+    </LinearLayout>
+</RelativeLayout>

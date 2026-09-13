@@ -475,6 +475,8 @@ class MainActivity : AppCompatActivity() {
         setupPreviewWallpaper()
         // Force a full widget update every time the app is opened
         updateWidget()
+        // Returning from the notification access screen
+        updateMediaStatus()
         // Update battery optimization switch state
         updateBatteryOptimizationSwitch()
     }
@@ -1079,6 +1081,8 @@ class MainActivity : AppCompatActivity() {
         setupLanguageSection()
         
         // System sections
+        bindCategoryFoldable(R.id.header_media, R.id.content_media, getString(R.string.section_media_widget), R.drawable.ic_music_note, "section_media_expanded")
+        setupMediaWidgetSection()
         bindCategoryFoldable(R.id.header_language, R.id.content_language, getString(R.string.section_app_language), R.drawable.ic_language, "section_language_expanded")
         bindCategoryFoldable(R.id.header_advanced, R.id.content_advanced, getString(R.string.header_advanced), R.drawable.ic_tune, "section_advanced_expanded")
         bindCategoryFoldable(R.id.header_permissions, R.id.content_permissions, getString(R.string.header_permissions), R.drawable.ic_shield, "section_permissions_expanded")
@@ -1424,6 +1428,37 @@ class MainActivity : AppCompatActivity() {
             checkAllPermissions()
         }
     }
+    private fun setupMediaWidgetSection() {
+        findViewById<View>(R.id.btn_media_access).setOnClickListener {
+            try {
+                startActivity(com.leanbitlab.lwidget.media.MediaWidgetProvider.listenerSettingsIntent(this))
+            } catch (e: Exception) {
+                startActivity(Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+            }
+        }
+        findViewById<View>(R.id.btn_media_add).setOnClickListener {
+            val manager = AppWidgetManager.getInstance(this)
+            val provider = ComponentName(this, com.leanbitlab.lwidget.media.MediaWidgetProvider::class.java)
+            if (manager.isRequestPinAppWidgetSupported) {
+                manager.requestPinAppWidget(provider, null, null)
+            } else {
+                com.google.android.material.snackbar.Snackbar.make(
+                    findViewById(R.id.fab_update), getString(R.string.media_add_manually),
+                    com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                ).show()
+            }
+        }
+        updateMediaStatus()
+    }
+
+    private fun updateMediaStatus() {
+        val status = findViewById<TextView>(R.id.text_media_status) ?: return
+        val granted = com.leanbitlab.lwidget.media.MediaWidgetProvider.hasAccess(this)
+        status.text = getString(if (granted) R.string.media_status_granted else R.string.media_status_missing)
+        findViewById<View>(R.id.btn_media_access)?.visibility = if (granted) View.GONE else View.VISIBLE
+        com.leanbitlab.lwidget.media.MediaWidgetProvider.updateAll(this)
+    }
+
     private fun setupHealthConnectSection() {
         val healthSwitch = bindFoldedSection(
             R.id.header_health_connect, R.drawable.ic_heart, getString(R.string.category_health),
