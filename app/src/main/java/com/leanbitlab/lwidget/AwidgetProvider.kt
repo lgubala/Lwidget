@@ -520,7 +520,7 @@ class AwidgetProvider : AppWidgetProvider() {
                 return agendaViews
             } else if (mode == UpdateMode.ALARM_ONLY) {
                 val alarmViews = RemoteViews(context.packageName, layoutId)
-                if (showNextAlarm) loadNextAlarm(context, alarmViews, sizeNextAlarm, secondaryColor, prefs, showDate || showWorldClock)
+                if (showNextAlarm) loadNextAlarm(context, alarmViews, sizeNextAlarm, if (isBlueprint) dateColor else alarmColor, prefs, showDate || showWorldClock)
                 return alarmViews
             }
 
@@ -1063,7 +1063,8 @@ class AwidgetProvider : AppWidgetProvider() {
             // --- Next Alarm ---
             views.setViewVisibility(R.id.layout_next_alarm, if (showNextAlarm) android.view.View.VISIBLE else android.view.View.GONE)
             if (showNextAlarm) {
-                loadNextAlarm(context, views, sizeNextAlarm, alarmColor, prefs, showDate || showWorldClock)
+                // Blueprint keeps the alarm in the date's colour; it shares that line
+                loadNextAlarm(context, views, sizeNextAlarm, if (isBlueprint) dateColor else alarmColor, prefs, showDate || showWorldClock)
             }
             // Click action for Next Alarm (same as Clock)
             views.setOnClickPendingIntent(R.id.layout_next_alarm, alarmPendingIntent)
@@ -1294,7 +1295,7 @@ class AwidgetProvider : AppWidgetProvider() {
         }
 
         /** Returns the number of slots filled. */
-        private fun bindCalendarEvents(context: Context, views: RemoteViews, events: List<EventInfo>, textSizeSp: Float, primaryColor: Int, secondaryColor: Int, eventViews: List<Int>, prefs: SharedPreferences): Int {
+        private fun bindCalendarEvents(context: Context, views: RemoteViews, events: List<EventInfo>, textSizeSp: Float, primaryColor: Int, secondaryColor: Int, eventViews: List<Int>, prefs: SharedPreferences, bulletColor: Int? = null): Int {
             val showDayAbbr = prefs.getBoolean("show_day_abbr_in_events", true)
 
             if (events.isEmpty()) {
@@ -1317,7 +1318,7 @@ class AwidgetProvider : AppWidgetProvider() {
                     
                     val fullText = "• $timeText  ${event.title}"
                     val spannable = SpannableString(fullText)
-                    val accentColor = context.getColor(R.color.widget_outline) 
+                    val accentColor = bulletColor ?: context.getColor(R.color.widget_outline)
                     spannable.setSpan(ForegroundColorSpan(accentColor), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
                     
                     views.setTextViewText(eventViews[i], spannable)
@@ -1370,14 +1371,15 @@ class AwidgetProvider : AppWidgetProvider() {
             views.setViewVisibility(R.id.tasks_column, if (showTasks) android.view.View.VISIBLE else android.view.View.GONE)
 
             val eventsUsed = if (showEvents) {
-                loadCalendarEvents(context, views, sizeEvents, primaryColor, secondaryColor, prefs, eventSlots)
+                // Bullets follow the text colours instead of the default purple accent
+                loadCalendarEvents(context, views, sizeEvents, primaryColor, secondaryColor, prefs, eventSlots, bulletColor = secondaryColor)
             } else 0
             for (i in eventsUsed until agendaSlots.size) {
                 views.setViewVisibility(agendaSlots[i], android.view.View.GONE)
             }
 
             val tasksUsed = if (showTasks) {
-                loadTasks(context, views, sizeTasks, primaryColor, taskLines)
+                loadTasks(context, views, sizeTasks, primaryColor, taskLines, bulletColor = secondaryColor)
             } else 0
             for (i in tasksUsed until taskSlots.size) {
                 views.setViewVisibility(taskSlots[i], android.view.View.GONE)
@@ -1413,7 +1415,7 @@ class AwidgetProvider : AppWidgetProvider() {
         }
 
         /** Returns the number of slots filled. */
-        private fun loadCalendarEvents(context: Context, views: RemoteViews, textSizeSp: Float, primaryColor: Int, secondaryColor: Int, prefs: SharedPreferences, eventViews: List<Int>): Int {
+        private fun loadCalendarEvents(context: Context, views: RemoteViews, textSizeSp: Float, primaryColor: Int, secondaryColor: Int, prefs: SharedPreferences, eventViews: List<Int>, bulletColor: Int? = null): Int {
             if (eventViews.isEmpty()) return 0
             if (androidx.core.content.ContextCompat.checkSelfPermission(
                     context, android.Manifest.permission.READ_CALENDAR
@@ -1423,7 +1425,7 @@ class AwidgetProvider : AppWidgetProvider() {
 
             return try {
                 val events = fetchCalendarEvents(context)
-                bindCalendarEvents(context, views, events, textSizeSp, primaryColor, secondaryColor, eventViews, prefs)
+                bindCalendarEvents(context, views, events, textSizeSp, primaryColor, secondaryColor, eventViews, prefs, bulletColor)
             } catch (e: Exception) {
                 // Log and gracefully handle crash
                 android.util.Log.e("LWidget", "Error loading calendar events", e)
@@ -1579,7 +1581,7 @@ class AwidgetProvider : AppWidgetProvider() {
         }
 
         /** Returns the number of slots filled. */
-        private fun loadTasks(context: Context, views: RemoteViews, textSizeSp: Float, primaryColor: Int, eventViews: List<Int>): Int {
+        private fun loadTasks(context: Context, views: RemoteViews, textSizeSp: Float, primaryColor: Int, eventViews: List<Int>, bulletColor: Int? = null): Int {
             if (eventViews.isEmpty()) return 0
 
             // Debugging: Check permission again contextually
@@ -1605,7 +1607,7 @@ class AwidgetProvider : AppWidgetProvider() {
                 val dueSuffix = formatDueSuffix(task.dueMillis)
                 val fullText = "• ${task.title}$dueSuffix"
                 val spannable = SpannableString(fullText)
-                val accentColor = context.getColor(R.color.widget_outline)
+                val accentColor = bulletColor ?: context.getColor(R.color.widget_outline)
                 spannable.setSpan(ForegroundColorSpan(accentColor), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
 
                 views.setTextViewText(eventViews[i], spannable)
