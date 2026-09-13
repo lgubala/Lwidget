@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
+import com.leanbitlab.lwidget.R
 
 /** Refresh hub for the fold desk widgets (Today, Notes, Tasks, Search). */
 object DeskWidgets {
@@ -19,7 +20,13 @@ object DeskWidgets {
     }
 
     fun updateToday(context: Context) = update(context, TodayWidgetProvider::class.java) { TodayWidgetProvider.build(it) }
-    fun updateNotes(context: Context) = update(context, NotesWidgetProvider::class.java) { NotesWidgetProvider.build(it) }
+    fun updateNotes(context: Context) {
+        update(context, NotesWidgetProvider::class.java) { NotesWidgetProvider.build(it) }
+        val manager = AppWidgetManager.getInstance(context)
+        val ids = manager.getAppWidgetIds(ComponentName(context, NotesWidgetProvider::class.java))
+        @Suppress("DEPRECATION")
+        if (ids.isNotEmpty()) manager.notifyAppWidgetViewDataChanged(ids, R.id.notes_grid)
+    }
     fun updateTasks(context: Context) = update(context, TasksWidgetProvider::class.java) { TasksWidgetProvider.build(it) }
     fun updateSearch(context: Context) = update(context, SearchWidgetProvider::class.java) { SearchWidgetProvider.build(it) }
 

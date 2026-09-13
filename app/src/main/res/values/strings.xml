@@ -127,7 +127,6 @@
     <string name="notes_label">Notes</string>
     <string name="notes_add">+ NEW</string>
     <string name="notes_empty">Tap to jot something down</string>
-    <string name="notes_more">+%d more</string>
     <string name="note_meta_pinned">Pinned</string>
     <string name="note_meta_today">Today</string>
     <string name="note_meta_yesterday">Yesterday</string>

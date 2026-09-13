@@ -42,252 +42,36 @@
             android:includeFontPadding="false" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/notes_empty"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/desk_note"
-        android:gravity="center"
-        android:padding="12dp"
-        android:text="@string/notes_empty"
-        android:textColor="#8B8B90"
-        android:textSize="12.5sp"
-        android:visibility="gone" />
+        android:layout_marginTop="4dp">
 
-    <LinearLayout
-        android:id="@+id/notes_row_0"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="4dp"
-        android:orientation="horizontal"
-        android:baselineAligned="false">
-
-        <LinearLayout
-            android:id="@+id/note_cell_0"
-            android:layout_width="0dp"
+        <!-- Scrolls when there are more notes than fit -->
+        <GridView
+            android:id="@+id/notes_grid"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginEnd="3dp"
-            android:background="@drawable/desk_note"
-            android:orientation="vertical"
-            android:padding="10dp">
+            android:numColumns="2"
+            android:horizontalSpacing="6dp"
+            android:verticalSpacing="6dp"
+            android:stretchMode="columnWidth"
+            android:listSelector="@android:color/transparent"
+            android:scrollbars="none"
+            android:fadingEdgeLength="16dp"
+            android:requiresFadingEdge="vertical" />
 
-            <TextView
-                android:id="@+id/note_text_0"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:maxLines="7"
-                android:ellipsize="end"
-                android:lineSpacingMultiplier="1.1"
-                android:textColor="#EDEDEE"
-                android:textSize="12.5sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/note_meta_0"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:fontFamily="monospace"
-            android:letterSpacing="0.13"
-            android:textAllCaps="true"
-            android:textColor="#55555A"
-            android:textSize="8sp"
-            android:includeFontPadding="false" />
-
-                <ImageView
-                    android:id="@+id/note_pin_0"
-                    android:layout_width="6dp"
-                    android:layout_height="6dp"
-                    android:src="@drawable/ic_pin_dot"
-                    android:visibility="gone"
-                    android:importantForAccessibility="no" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/note_cell_1"
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/notes_empty"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="3dp"
             android:background="@drawable/desk_note"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <TextView
-                android:id="@+id/note_text_1"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:maxLines="7"
-                android:ellipsize="end"
-                android:lineSpacingMultiplier="1.1"
-                android:textColor="#EDEDEE"
-                android:textSize="12.5sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/note_meta_1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:fontFamily="monospace"
-            android:letterSpacing="0.13"
-            android:textAllCaps="true"
-            android:textColor="#55555A"
-            android:textSize="8sp"
-            android:includeFontPadding="false" />
-
-                <ImageView
-                    android:id="@+id/note_pin_1"
-                    android:layout_width="6dp"
-                    android:layout_height="6dp"
-                    android:src="@drawable/ic_pin_dot"
-                    android:visibility="gone"
-                    android:importantForAccessibility="no" />
-            </LinearLayout>
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/notes_row_1"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="6dp"
-        android:orientation="horizontal"
-        android:baselineAligned="false"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:id="@+id/note_cell_2"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginEnd="3dp"
-            android:background="@drawable/desk_note"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <TextView
-                android:id="@+id/note_text_2"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:maxLines="7"
-                android:ellipsize="end"
-                android:lineSpacingMultiplier="1.1"
-                android:textColor="#EDEDEE"
-                android:textSize="12.5sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/note_meta_2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:fontFamily="monospace"
-            android:letterSpacing="0.13"
-            android:textAllCaps="true"
-            android:textColor="#55555A"
-            android:textSize="8sp"
-            android:includeFontPadding="false" />
-
-                <ImageView
-                    android:id="@+id/note_pin_2"
-                    android:layout_width="6dp"
-                    android:layout_height="6dp"
-                    android:src="@drawable/ic_pin_dot"
-                    android:visibility="gone"
-                    android:importantForAccessibility="no" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/note_cell_3"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="3dp"
-            android:background="@drawable/desk_note"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <TextView
-                android:id="@+id/note_text_3"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:maxLines="7"
-                android:ellipsize="end"
-                android:lineSpacingMultiplier="1.1"
-                android:textColor="#EDEDEE"
-                android:textSize="12.5sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/note_meta_3"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:fontFamily="monospace"
-            android:letterSpacing="0.13"
-            android:textAllCaps="true"
-            android:textColor="#55555A"
-            android:textSize="8sp"
-            android:includeFontPadding="false" />
-
-                <ImageView
-                    android:id="@+id/note_pin_3"
-                    android:layout_width="6dp"
-                    android:layout_height="6dp"
-                    android:src="@drawable/ic_pin_dot"
-                    android:visibility="gone"
-                    android:importantForAccessibility="no" />
-            </LinearLayout>
-        </LinearLayout>
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/notes_more"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:gravity="end"
-        android:visibility="gone"
-        android:fontFamily="monospace"
-            android:letterSpacing="0.13"
-            android:textAllCaps="true"
-            android:textColor="#55555A"
-            android:textSize="8sp"
-            android:includeFontPadding="false" />
+            android:gravity="center"
+            android:padding="12dp"
+            android:text="@string/notes_empty"
+            android:textColor="#8B8B90"
+            android:textSize="12.5sp"
+            android:visibility="gone" />
+    </FrameLayout>
 </LinearLayout>
