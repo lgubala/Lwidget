@@ -1367,21 +1367,19 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             prefs.edit().putBoolean("show_steps", isChecked).apply()
-            val keepAlive = prefs.getBoolean("keep_alive", false)
-            val serviceIntent = Intent(this, StepCounterService::class.java)
-            if (isChecked) {
+            if (isChecked && !prefs.getBoolean("use_health_connect", false)) {
                 val hasPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                     ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED
                 } else { true }
-                if (hasPermission) { startForegroundService(serviceIntent) }
-                else {
+                if (!hasPermission) {
                     prefs.edit().putBoolean("show_steps", false).apply()
                     updateWidget()
                     updateToggleAvailability()
                     checkAllPermissions()
                     return@setOnCheckedChangeListener
                 }
-            } else if (!keepAlive) { stopService(serviceIntent) }
+            }
+            StepCounterService.sync(this)
             updateFeatureRowVisibility(stepsSwitch, isChecked, R.id.row_steps_size)
             updateWidget()
             updateToggleAvailability()
@@ -1443,6 +1441,7 @@ class MainActivity : AppCompatActivity() {
                 return@setOnCheckedChangeListener
             }
             prefs.edit().putBoolean("use_health_connect", isChecked).apply()
+            StepCounterService.sync(this)
             if (isChecked) {
                 requestHealthPermissions()
             } else {
@@ -1545,19 +1544,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             prefs.edit().putBoolean("keep_alive", isChecked).apply()
-            val showSteps = prefs.getBoolean("show_steps", false)
-            val serviceIntent = Intent(this, StepCounterService::class.java)
-            val hasActivityPerm = android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED
-            if ((isChecked || showSteps) && hasActivityPerm) {
-                try {
-                    ContextCompat.startForegroundService(this, serviceIntent)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            } else {
-                stopService(serviceIntent)
-            }
+            StepCounterService.sync(this)
         }
     }
     private fun setupBatteryOptimizationSection() {

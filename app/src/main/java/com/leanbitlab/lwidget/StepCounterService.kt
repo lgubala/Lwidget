@@ -57,6 +57,49 @@ class StepCounterService : Service(), SensorEventListener {
         const val CHANNEL_ID = "StepCounterChannel"
         const val NOTIFICATION_ID = 42100
         const val ACTION_STEP_UPDATE = "com.leanbitlab.lwidget.ACTION_STEP_UPDATE"
+
+        /**
+         * The service is only worth running for Keep Alive, or for a widget that counts steps with
+         * the phone's own sensor. Steps read from Health Connect come from the watch instead.
+         * Settings are per widget, so every placed widget is checked.
+         */
+        fun isNeeded(context: Context): Boolean {
+            val global = context.getSharedPreferences("com.leanbitlab.lwidget.PREFS", Context.MODE_PRIVATE)
+            val ids = android.appwidget.AppWidgetManager.getInstance(context)
+                .getAppWidgetIds(android.content.ComponentName(context, AwidgetProvider::class.java))
+            val scopes: List<SharedPreferences> = if (ids.isEmpty()) {
+                listOf(global)
+            } else {
+                ids.map { id ->
+                    FallbackPreferences(
+                        context.getSharedPreferences("com.leanbitlab.lwidget.PREFS_" + id, Context.MODE_PRIVATE),
+                        global
+                    )
+                }
+            }
+            return scopes.any {
+                it.getBoolean("keep_alive", false) ||
+                    (it.getBoolean("show_steps", false) && !it.getBoolean("use_health_connect", false))
+            }
+        }
+
+        /** Starts or stops the service to match the current settings. */
+        fun sync(context: Context) {
+            val intent = Intent(context, StepCounterService::class.java)
+            // FOREGROUND_SERVICE_TYPE_HEALTH requires ACTIVITY_RECOGNITION at runtime
+            val hasActivityPerm = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
+                ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACTIVITY_RECOGNITION) ==
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+            if (isNeeded(context) && hasActivityPerm) {
+                try {
+                    ContextCompat.startForegroundService(context, intent)
+                } catch (e: Exception) {
+                    android.util.Log.e("LWidget", "Failed to start StepCounterService: " + e.message)
+                }
+            } else {
+                context.stopService(intent)
+            }
+        }
     }
 
     override fun onCreate() {
@@ -77,6 +120,13 @@ class StepCounterService : Service(), SensorEventListener {
             }
         } catch (e: Exception) {
             android.util.Log.e("LWidget", "Cannot start foreground service", e)
+            stopSelf()
+            return
+        }
+
+        // Started from a stale path, or restarted as sticky, after the settings changed
+        if (!isNeeded(this)) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
             return
         }

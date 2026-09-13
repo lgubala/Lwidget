@@ -319,24 +319,9 @@ class AwidgetProvider : AppWidgetProvider() {
             }
             val sizeSteps = prefs.getFloat("size_steps", 14f)
 
-            // Make sure the background Step Service is running if steps or keep-alive is enabled
-            val keepAlive = prefs.getBoolean("keep_alive", false)
-            val serviceIntent = Intent(context, StepCounterService::class.java)
-            // FOREGROUND_SERVICE_TYPE_HEALTH requires ACTIVITY_RECOGNITION at runtime
-            val hasActivityPerm = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACTIVITY_RECOGNITION) == android.content.pm.PackageManager.PERMISSION_GRANTED
-            } else true
-            val needsStepService = (showSteps && !stepsFromHealthConnect) || keepAlive
-            if (needsStepService && hasActivityPerm) {
-                try {
-                    context.startForegroundService(serviceIntent)
-                } catch (e: Exception) {
-                    android.util.Log.e("AwidgetProvider", "Failed to start StepCounterService from background: ${e.message}")
-                }
-            } else {
-                context.stopService(serviceIntent)
-            }
-
+            // Keep the phone's step service in line with the settings; it stays off when
+            // Health Connect supplies the steps.
+            StepCounterService.sync(context)
 
             val fontStyle = prefs.getInt("font_style", 0)
             
