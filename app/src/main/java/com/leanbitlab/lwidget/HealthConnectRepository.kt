@@ -65,9 +65,11 @@ object HealthConnectRepository {
     fun hasCachedData(prefs: SharedPreferences): Boolean =
         prefs.getLong(KEY_LAST_SYNC, 0L) > 0L
 
-    suspend fun refreshIfStale(context: Context, prefs: SharedPreferences) {
+    /** [maxAgeMs] overrides the default cache lifetime; 0 always re-reads. */
+    suspend fun refreshIfStale(context: Context, prefs: SharedPreferences, maxAgeMs: Long? = null) {
         val last = prefs.getLong(KEY_LAST_SYNC, 0L)
-        if (last > 0L && Instant.now().toEpochMilli() - last < CACHE_TTL.toMillis()) return
+        val ttl = maxAgeMs ?: CACHE_TTL.toMillis()
+        if (last > 0L && Instant.now().toEpochMilli() - last < ttl) return
         refresh(context, prefs)
     }
 

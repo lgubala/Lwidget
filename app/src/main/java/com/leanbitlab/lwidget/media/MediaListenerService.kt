@@ -43,6 +43,7 @@ class MediaListenerService : NotificationListenerService() {
         override fun onReceive(context: Context, intent: Intent) = refresh()
     }
     private var screenReceiverRegistered = false
+    private val unlockReceiver = com.leanbitlab.lwidget.UnlockRefresher.newReceiver()
 
     private val progressTicker = object : Runnable {
         override fun run() {
@@ -66,6 +67,7 @@ class MediaListenerService : NotificationListenerService() {
         }
         if (!screenReceiverRegistered) {
             registerReceiver(screenOnReceiver, IntentFilter(Intent.ACTION_SCREEN_ON))
+            com.leanbitlab.lwidget.UnlockRefresher.register(this, unlockReceiver)
             screenReceiverRegistered = true
         }
         refresh()
@@ -95,6 +97,7 @@ class MediaListenerService : NotificationListenerService() {
         handler.removeCallbacks(progressTicker)
         if (screenReceiverRegistered) {
             unregisterReceiver(screenOnReceiver)
+            unregisterReceiver(unlockReceiver)
             screenReceiverRegistered = false
         }
         sessionManager?.removeOnActiveSessionsChangedListener(sessionsListener)

@@ -28,6 +28,7 @@ class StepCounterService : Service(), SensorEventListener {
     private var stepDate: String = ""
 
     private var lastBatteryPct = -1
+    private val unlockReceiver = UnlockRefresher.newReceiver()
 
     private val updateReceiver = object : android.content.BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -165,6 +166,7 @@ class StepCounterService : Service(), SensorEventListener {
         } else {
             registerReceiver(updateReceiver, filter)
         }
+        UnlockRefresher.register(this, unlockReceiver)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -179,6 +181,7 @@ class StepCounterService : Service(), SensorEventListener {
     override fun onDestroy() {
         try {
             unregisterReceiver(updateReceiver)
+            unregisterReceiver(unlockReceiver)
         } catch (e: Exception) {
             // Receiver might not have been registered if initialization stopped early
         }

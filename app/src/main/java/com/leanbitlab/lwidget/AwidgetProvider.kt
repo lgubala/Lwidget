@@ -104,6 +104,7 @@ class AwidgetProvider : AppWidgetProvider() {
             Intent.ACTION_MY_PACKAGE_REPLACED,
             Intent.ACTION_CONFIGURATION_CHANGED,
             ACTION_BATTERY_UPDATE,
+            ACTION_REFRESH_NOW,
             StepCounterService.ACTION_STEP_UPDATE,
             Intent.ACTION_PROVIDER_CHANGED,
             android.app.AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED,
@@ -119,6 +120,11 @@ class AwidgetProvider : AppWidgetProvider() {
                         }
                         ACTION_BATTERY_UPDATE -> {
                             appWidgetIds.forEach { updateAppWidget(context, appWidgetManager, it, UpdateMode.TICK) }
+                        }
+                        ACTION_REFRESH_NOW -> {
+                            // A tap re-reads Health Connect outright; an unlock accepts figures a couple of minutes old
+                            val maxAge = if (intent.getBooleanExtra(EXTRA_FORCE, false)) 0L else UNLOCK_HEALTH_MAX_AGE_MS
+                            appWidgetIds.forEach { updateAppWidget(context, appWidgetManager, it, UpdateMode.FULL, maxAge) }
                         }
                         StepCounterService.ACTION_STEP_UPDATE -> {
                             // Step event updates match Tick mode conceptually 
@@ -511,6 +517,9 @@ class AwidgetProvider : AppWidgetProvider() {
                 if (showData) updateDataUsage(context, tickViews, prefs)
                 if (showStorage) updateStorageStats(tickViews, prefs)
                 if (showRam) updateRamStats(context, tickViews, prefs)
+                // These change through the day as well; the timer refresh used to skip them
+                if (prefs.getBoolean("show_screen_time", false)) updateScreenTime(context, tickViews, prefs)
+                applyHealthItems(tickViews, healthItems(context, prefs), secondaryColor)
                 return tickViews
             } else if (mode == UpdateMode.CALENDAR_ONLY || mode == UpdateMode.TASKS_ONLY) {
                 // Both share the same text slots, so a partial update has to redraw the pair
@@ -747,50 +756,8 @@ class AwidgetProvider : AppWidgetProvider() {
             }
 
             // --- Health Connect figures (steps come from the shared step view above) ---
-            val healthPrefs = context.getSharedPreferences("com.leanbitlab.lwidget.PREFS", Context.MODE_PRIVATE)
-            val useHealthConnect = prefs.getBoolean("use_health_connect", false)
-
-            data class HealthItem(
-                val layoutId: Int, val textId: Int, val iconId: Int,
-                val show: Boolean, val size: Float, val text: String?
-            )
-
-            val sleepMinutes = healthPrefs.getInt(HealthConnectRepository.KEY_SLEEP_MINUTES, -1)
-            val restingHr = healthPrefs.getInt(HealthConnectRepository.KEY_RESTING_HR, -1)
-            val calories = healthPrefs.getInt(HealthConnectRepository.KEY_CALORIES, -1)
-
-            val healthItems = listOf(
-                HealthItem(
-                    R.id.layout_sleep, R.id.text_sleep, R.id.icon_sleep,
-                    useHealthConnect && prefs.getBoolean("show_sleep", false),
-                    prefs.getFloat("size_sleep", 14f),
-                    if (sleepMinutes >= 0) "${sleepMinutes / 60}h ${sleepMinutes % 60}m" else null
-                ),
-                HealthItem(
-                    R.id.layout_resting_hr, R.id.text_resting_hr, R.id.icon_resting_hr,
-                    useHealthConnect && prefs.getBoolean("show_resting_hr", false),
-                    prefs.getFloat("size_resting_hr", 14f),
-                    if (restingHr > 0) "$restingHr" else null
-                ),
-                HealthItem(
-                    R.id.layout_calories, R.id.text_calories, R.id.icon_calories,
-                    useHealthConnect && prefs.getBoolean("show_calories", false),
-                    prefs.getFloat("size_calories", 14f),
-                    if (calories >= 0) "$calories" else null
-                )
-            )
-
-            for (item in healthItems) {
-                val visible = item.show && item.text != null
-                views.setViewVisibility(item.layoutId, if (visible) android.view.View.VISIBLE else android.view.View.GONE)
-                if (visible) {
-                    views.setTextViewText(item.textId, item.text)
-                    views.setTextViewTextSize(item.textId, android.util.TypedValue.COMPLEX_UNIT_SP, item.size)
-                    views.setTextColor(item.textId, secondaryColor)
-                    views.setInt(item.iconId, "setColorFilter", secondaryColor)
-                }
-            }
-
+            val healthItems = healthItems(context, prefs)
+            applyHealthItems(views, healthItems, secondaryColor)
 
             // --- Dynamic Spacing Logic for Both Sides ---
             fun dpToPx(dp: Float): Int {
@@ -916,6 +883,18 @@ class AwidgetProvider : AppWidgetProvider() {
                 views.setViewVisibility(
                     R.id.bp_spacer,
                     if (showEvents || showTasks) android.view.View.GONE else android.view.View.VISIBLE
+                )
+
+                // Tapping the health figures pulls fresh numbers from Health Connect straight away
+                views.setOnClickPendingIntent(
+                    R.id.bio_container,
+                    PendingIntent.getBroadcast(
+                        context, 9001,
+                        Intent(context, AwidgetProvider::class.java)
+                            .setAction(ACTION_REFRESH_NOW)
+                            .putExtra(EXTRA_FORCE, true),
+                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                    )
                 )
 
                 views.setInt(R.id.icon_tasks_header, "setColorFilter", labelColor)
@@ -1119,6 +1098,52 @@ class AwidgetProvider : AppWidgetProvider() {
             return kotlin.math.round(if (fahrenheit) celsius * 9 / 5 + 32 else celsius).toInt()
         }
 
+        internal data class HealthItem(
+            val layoutId: Int, val textId: Int, val iconId: Int,
+            val show: Boolean, val size: Float, val text: String?
+        )
+
+        private fun healthItems(context: Context, prefs: SharedPreferences): List<HealthItem> {
+            val cache = context.getSharedPreferences("com.leanbitlab.lwidget.PREFS", Context.MODE_PRIVATE)
+            val enabled = prefs.getBoolean("use_health_connect", false)
+            val sleepMinutes = cache.getInt(HealthConnectRepository.KEY_SLEEP_MINUTES, -1)
+            val restingHr = cache.getInt(HealthConnectRepository.KEY_RESTING_HR, -1)
+            val calories = cache.getInt(HealthConnectRepository.KEY_CALORIES, -1)
+            return listOf(
+                HealthItem(
+                    R.id.layout_sleep, R.id.text_sleep, R.id.icon_sleep,
+                    enabled && prefs.getBoolean("show_sleep", false),
+                    prefs.getFloat("size_sleep", 14f),
+                    if (sleepMinutes >= 0) "${sleepMinutes / 60}h ${sleepMinutes % 60}m" else null
+                ),
+                HealthItem(
+                    R.id.layout_resting_hr, R.id.text_resting_hr, R.id.icon_resting_hr,
+                    enabled && prefs.getBoolean("show_resting_hr", false),
+                    prefs.getFloat("size_resting_hr", 14f),
+                    if (restingHr > 0) "$restingHr" else null
+                ),
+                HealthItem(
+                    R.id.layout_calories, R.id.text_calories, R.id.icon_calories,
+                    enabled && prefs.getBoolean("show_calories", false),
+                    prefs.getFloat("size_calories", 14f),
+                    if (calories >= 0) "$calories" else null
+                )
+            )
+        }
+
+        private fun applyHealthItems(views: RemoteViews, items: List<HealthItem>, color: Int) {
+            for (item in items) {
+                val visible = item.show && item.text != null
+                views.setViewVisibility(item.layoutId, if (visible) android.view.View.VISIBLE else android.view.View.GONE)
+                if (visible) {
+                    views.setTextViewText(item.textId, item.text)
+                    views.setTextViewTextSize(item.textId, android.util.TypedValue.COMPLEX_UNIT_SP, item.size)
+                    views.setTextColor(item.textId, color)
+                    views.setInt(item.iconId, "setColorFilter", color)
+                }
+            }
+        }
+
         /** The same widget-then-global lookup the settings screen writes through. */
         private fun widgetPrefs(context: Context, appWidgetId: Int): SharedPreferences {
             val globalPrefs = context.getSharedPreferences("com.leanbitlab.lwidget.PREFS", Context.MODE_PRIVATE)
@@ -1132,12 +1157,16 @@ class AwidgetProvider : AppWidgetProvider() {
             }
         }
 
-        suspend fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, mode: UpdateMode = UpdateMode.FULL) {
+        const val ACTION_REFRESH_NOW = "com.leanbitlab.lwidget.ACTION_REFRESH_NOW"
+        const val EXTRA_FORCE = "force"
+        private const val UNLOCK_HEALTH_MAX_AGE_MS = 2 * 60_000L
+
+        suspend fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, mode: UpdateMode = UpdateMode.FULL, healthMaxAgeMs: Long? = null) {
             // The toggle is saved per widget, so it has to be read per widget; the figures
             // themselves are device-wide and cached globally.
             if (widgetPrefs(context, appWidgetId).getBoolean("use_health_connect", false)) {
                 val globalPrefs = context.getSharedPreferences("com.leanbitlab.lwidget.PREFS", Context.MODE_PRIVATE)
-                HealthConnectRepository.refreshIfStale(context, globalPrefs)
+                HealthConnectRepository.refreshIfStale(context, globalPrefs, healthMaxAgeMs)
             }
             val views = buildAppWidgetRemoteViews(context, appWidgetId, mode)
             if (mode == UpdateMode.FULL) {
