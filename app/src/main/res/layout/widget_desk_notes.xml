@@ -28,14 +28,17 @@
             android:id="@+id/notes_add"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="10dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/desk_chip"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="9dp"
+            android:paddingBottom="9dp"
             android:fontFamily="monospace"
             android:letterSpacing="0.13"
             android:text="@string/notes_add"
             android:textColor="#8B8B90"
-            android:textSize="9sp"
+            android:textSize="12sp"
             android:includeFontPadding="false" />
     </LinearLayout>
 
