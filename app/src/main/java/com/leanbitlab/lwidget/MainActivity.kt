@@ -1081,6 +1081,8 @@ class MainActivity : AppCompatActivity() {
         setupLanguageSection()
         
         // System sections
+        bindCategoryFoldable(R.id.header_desk, R.id.content_desk, getString(R.string.section_desk), R.drawable.ic_events, "section_desk_expanded")
+        setupDeskSection()
         bindCategoryFoldable(R.id.header_media, R.id.content_media, getString(R.string.section_media_widget), R.drawable.ic_music_note, "section_media_expanded")
         setupMediaWidgetSection()
         bindCategoryFoldable(R.id.header_language, R.id.content_language, getString(R.string.section_app_language), R.drawable.ic_language, "section_language_expanded")
@@ -1428,6 +1430,31 @@ class MainActivity : AppCompatActivity() {
             checkAllPermissions()
         }
     }
+    private fun setupDeskSection() {
+        val widgets = mapOf(
+            R.id.btn_desk_today to com.leanbitlab.lwidget.desk.TodayWidgetProvider::class.java,
+            R.id.btn_desk_notes to com.leanbitlab.lwidget.desk.NotesWidgetProvider::class.java,
+            R.id.btn_desk_tasks to com.leanbitlab.lwidget.desk.TasksWidgetProvider::class.java,
+            R.id.btn_desk_search to com.leanbitlab.lwidget.desk.SearchWidgetProvider::class.java,
+            R.id.btn_desk_player to com.leanbitlab.lwidget.media.SoftPlayerWidgetProvider::class.java
+        )
+        for ((buttonId, provider) in widgets) {
+            findViewById<View>(buttonId).setOnClickListener { pinWidget(provider) }
+        }
+    }
+
+    private fun pinWidget(provider: Class<*>) {
+        val manager = AppWidgetManager.getInstance(this)
+        if (manager.isRequestPinAppWidgetSupported) {
+            manager.requestPinAppWidget(ComponentName(this, provider), null, null)
+        } else {
+            com.google.android.material.snackbar.Snackbar.make(
+                findViewById(R.id.fab_update), getString(R.string.media_add_manually),
+                com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+            ).show()
+        }
+    }
+
     private fun setupMediaWidgetSection() {
         findViewById<View>(R.id.btn_media_access).setOnClickListener {
             try {
@@ -2287,5 +2314,8 @@ class MainActivity : AppCompatActivity() {
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
         }
         sendBroadcast(intent)
+        // Companion widgets follow the same colours, so redraw them after a change here
+        com.leanbitlab.lwidget.desk.DeskWidgets.updateAll(this)
+        com.leanbitlab.lwidget.media.MediaWidgetProvider.updateAll(this)
     }
 }

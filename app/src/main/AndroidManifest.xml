@@ -51,6 +51,20 @@
         <intent>
             <action android:name="android.intent.action.SHOW_ALARMS" />
         </intent>
+        <!-- Search widget -->
+        <intent>
+            <action android:name="android.search.action.GLOBAL_SEARCH" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.WEB_SEARCH" />
+        </intent>
+        <intent>
+            <action android:name="android.speech.action.VOICE_SEARCH_HANDS_FREE" />
+        </intent>
+        <intent>
+            <action android:name="android.speech.action.WEB_SEARCH" />
+        </intent>
+        <package android:name="com.samsung.android.calendar" />
     </queries>
 
     <application
@@ -127,6 +141,71 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/media_widget_info" />
         </receiver>
+
+        <!-- Fold desk -->
+        <receiver
+            android:name=".desk.TodayWidgetProvider"
+            android:label="@string/desk_today_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/desk_today_info" />
+        </receiver>
+        <receiver
+            android:name=".desk.NotesWidgetProvider"
+            android:label="@string/desk_notes_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/desk_notes_info" />
+        </receiver>
+        <receiver
+            android:name=".desk.TasksWidgetProvider"
+            android:label="@string/desk_tasks_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/desk_tasks_info" />
+        </receiver>
+        <receiver
+            android:name=".desk.SearchWidgetProvider"
+            android:label="@string/desk_search_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/desk_search_info" />
+        </receiver>
+        <receiver
+            android:name=".media.SoftPlayerWidgetProvider"
+            android:label="@string/media_soft_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/media_soft_info" />
+        </receiver>
+
+        <activity
+            android:name=".notes.NoteEditorActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Lwidget.NoteEditor"
+            android:windowSoftInputMode="adjustResize|stateVisible" />
 
         <!-- Needed only to see other apps' media sessions; notifications themselves are ignored -->
         <service

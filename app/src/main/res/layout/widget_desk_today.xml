@@ -1,0 +1,525 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/today_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="6dp">
+
+    <TextClock
+        android:id="@+id/today_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:format12Hour="EEEE · MMM d"
+        android:format24Hour="EEEE · MMM d"
+        android:fontFamily="monospace"
+        android:letterSpacing="0.14"
+        android:textAllCaps="true"
+        android:textColor="#8B8B90"
+        android:textSize="9sp"
+        android:includeFontPadding="false" />
+
+    <TextClock
+        android:id="@+id/today_clock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:format12Hour="h:mm"
+        android:format24Hour="H:mm"
+        android:fontFamily="sans-serif-light"
+        android:letterSpacing="-0.02"
+        android:textColor="#EDEDEE"
+        android:textSize="60sp"
+        android:includeFontPadding="false" />
+
+    <LinearLayout
+        android:id="@+id/today_weather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/today_weather_icon"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:src="@drawable/ic_weather_cloudy"
+            android:importantForAccessibility="no" />
+
+        <TextView
+            android:id="@+id/today_weather_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="#8B8B90"
+            android:textSize="12.5sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/today_forecast"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:background="@drawable/desk_panel"
+        android:orientation="vertical"
+        android:padding="11dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/today_forecast_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/desk_label_forecast"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.13"
+            android:textAllCaps="true"
+            android:textColor="#55555A"
+            android:textSize="8sp"
+            android:includeFontPadding="false" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/today_fc_label_0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+            android:letterSpacing="0.13"
+            android:textAllCaps="true"
+            android:textColor="#55555A"
+            android:textSize="8sp"
+            android:includeFontPadding="false" />
+
+                    <ImageView
+                        android:id="@+id/today_fc_icon_0"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:src="@drawable/ic_weather_cloudy"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/today_fc_temp_0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:textColor="#EDEDEE"
+                        android:textSize="10.5sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/today_fc_label_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+            android:letterSpacing="0.13"
+            android:textAllCaps="true"
+            android:textColor="#55555A"
+            android:textSize="8sp"
+            android:includeFontPadding="false" />
+
+                    <ImageView
+                        android:id="@+id/today_fc_icon_1"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:src="@drawable/ic_weather_cloudy"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/today_fc_temp_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:textColor="#EDEDEE"
+                        android:textSize="10.5sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/today_fc_label_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+            android:letterSpacing="0.13"
+            android:textAllCaps="true"
+            android:textColor="#55555A"
+            android:textSize="8sp"
+            android:includeFontPadding="false" />
+
+                    <ImageView
+                        android:id="@+id/today_fc_icon_2"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:src="@drawable/ic_weather_cloudy"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/today_fc_temp_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:textColor="#EDEDEE"
+                        android:textSize="10.5sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/today_fc_label_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+            android:letterSpacing="0.13"
+            android:textAllCaps="true"
+            android:textColor="#55555A"
+            android:textSize="8sp"
+            android:includeFontPadding="false" />
+
+                    <ImageView
+                        android:id="@+id/today_fc_icon_3"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:src="@drawable/ic_weather_cloudy"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/today_fc_temp_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:textColor="#EDEDEE"
+                        android:textSize="10.5sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/today_fc_label_4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+            android:letterSpacing="0.13"
+            android:textAllCaps="true"
+            android:textColor="#55555A"
+            android:textSize="8sp"
+            android:includeFontPadding="false" />
+
+                    <ImageView
+                        android:id="@+id/today_fc_icon_4"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:src="@drawable/ic_weather_cloudy"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/today_fc_temp_4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:textColor="#EDEDEE"
+                        android:textSize="10.5sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/today_agenda"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/desk_panel"
+        android:orientation="vertical"
+        android:padding="11dp">
+
+        <TextView
+            android:id="@+id/today_agenda_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/desk_label_coming_up"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.13"
+            android:textAllCaps="true"
+            android:textColor="#55555A"
+            android:textSize="8sp"
+            android:includeFontPadding="false" />
+
+        <TextView
+            android:id="@+id/today_agenda_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="#8B8B90"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/today_rule_0"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="6dp"
+                android:background="#1E1E22"
+                android:visibility="gone"
+                android:importantForAccessibility="no" />
+
+            <LinearLayout
+                android:id="@+id/today_row_0"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/today_dow_0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+            android:letterSpacing="0.13"
+            android:textAllCaps="true"
+            android:textColor="#55555A"
+            android:textSize="8sp"
+            android:includeFontPadding="false" />
+
+                    <TextView
+                        android:id="@+id/today_day_0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="monospace"
+                        android:textColor="#EDEDEE"
+                        android:textSize="15sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/today_event_0"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:textColor="#EDEDEE"
+                    android:textSize="12.5sp" />
+            </LinearLayout>
+            <ImageView
+                android:id="@+id/today_rule_1"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="6dp"
+                android:background="#1E1E22"
+                android:visibility="gone"
+                android:importantForAccessibility="no" />
+
+            <LinearLayout
+                android:id="@+id/today_row_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/today_dow_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+            android:letterSpacing="0.13"
+            android:textAllCaps="true"
+            android:textColor="#55555A"
+            android:textSize="8sp"
+            android:includeFontPadding="false" />
+
+                    <TextView
+                        android:id="@+id/today_day_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="monospace"
+                        android:textColor="#EDEDEE"
+                        android:textSize="15sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/today_event_1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:textColor="#EDEDEE"
+                    android:textSize="12.5sp" />
+            </LinearLayout>
+            <ImageView
+                android:id="@+id/today_rule_2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="6dp"
+                android:background="#1E1E22"
+                android:visibility="gone"
+                android:importantForAccessibility="no" />
+
+            <LinearLayout
+                android:id="@+id/today_row_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/today_dow_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+            android:letterSpacing="0.13"
+            android:textAllCaps="true"
+            android:textColor="#55555A"
+            android:textSize="8sp"
+            android:includeFontPadding="false" />
+
+                    <TextView
+                        android:id="@+id/today_day_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="monospace"
+                        android:textColor="#EDEDEE"
+                        android:textSize="15sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/today_event_2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:textColor="#EDEDEE"
+                    android:textSize="12.5sp" />
+            </LinearLayout>
+            <ImageView
+                android:id="@+id/today_rule_3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="6dp"
+                android:background="#1E1E22"
+                android:visibility="gone"
+                android:importantForAccessibility="no" />
+
+            <LinearLayout
+                android:id="@+id/today_row_3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/today_dow_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+            android:letterSpacing="0.13"
+            android:textAllCaps="true"
+            android:textColor="#55555A"
+            android:textSize="8sp"
+            android:includeFontPadding="false" />
+
+                    <TextView
+                        android:id="@+id/today_day_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="monospace"
+                        android:textColor="#EDEDEE"
+                        android:textSize="15sp"
+                        android:includeFontPadding="false" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/today_event_3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:textColor="#EDEDEE"
+                    android:textSize="12.5sp" />
+            </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

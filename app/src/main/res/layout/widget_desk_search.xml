@@ -1,0 +1,43 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/search_root"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/desk_search_pill"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp">
+
+        <ImageView
+            android:id="@+id/search_icon"
+            android:layout_width="17dp"
+            android:layout_height="17dp"
+            android:src="@drawable/ic_search"
+            android:importantForAccessibility="no" />
+
+        <TextView
+            android:id="@+id/search_hint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="11dp"
+            android:text="@string/search_hint"
+            android:textColor="#8B8B90"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/search_mic"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_mic"
+            android:contentDescription="@string/search_voice" />
+    </LinearLayout>
+</FrameLayout>

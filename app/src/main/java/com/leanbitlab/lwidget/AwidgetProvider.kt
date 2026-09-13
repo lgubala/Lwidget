@@ -146,6 +146,13 @@ class AwidgetProvider : AppWidgetProvider() {
                             }
                         }
                     }
+                    // The fold desk shows the same calendar, tasks and weather; step ticks and alarm
+                    // changes don't affect it
+                    if (intent.action != StepCounterService.ACTION_STEP_UPDATE &&
+                        intent.action != android.app.AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED
+                    ) {
+                        com.leanbitlab.lwidget.desk.DeskWidgets.updateAll(context)
+                    }
                 } finally {
                     pendingResult.finish()
                 }
@@ -1075,7 +1082,7 @@ class AwidgetProvider : AppWidgetProvider() {
             return views
         }
 
-        private fun weatherIconFor(code: Int?): Int = when (code) {
+        internal fun weatherIconFor(code: Int?): Int = when (code) {
             800 -> R.drawable.ic_weather_sunny
             801, 802 -> R.drawable.ic_weather_partly_cloudy
             803, 804 -> R.drawable.ic_weather_cloudy
@@ -1234,7 +1241,7 @@ class AwidgetProvider : AppWidgetProvider() {
             }
         }
 
-        private fun fetchCalendarEvents(context: Context): List<EventInfo> {
+        internal fun fetchCalendarEvents(context: Context): List<EventInfo> {
             val syncedCalendarIds = mutableSetOf<Long>()
             val visibleCalendarIds = mutableSetOf<Long>()
 
@@ -1554,9 +1561,9 @@ class AwidgetProvider : AppWidgetProvider() {
             }
         }
 
-        private data class TaskData(val title: String, val dueMillis: Long)
+        internal data class TaskData(val title: String, val dueMillis: Long)
 
-        private fun fetchActiveTasks(context: Context, limit: Int): List<TaskData> {
+        internal fun fetchActiveTasks(context: Context, limit: Int): List<TaskData> {
             val tasks = mutableListOf<TaskData>()
             val taskUri = android.net.Uri.parse("content://org.tasks/tasks")
             val selection = "completed=0 AND deleted=0"
@@ -1591,7 +1598,7 @@ class AwidgetProvider : AppWidgetProvider() {
             return tasks
         }
 
-        private fun formatDueSuffix(dueMillis: Long): String {
+        internal fun formatDueSuffix(dueMillis: Long): String {
             if (dueMillis <= 0) return ""
             val dueDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(dueMillis), ZoneId.systemDefault()).toLocalDate()
             val today = LocalDate.now()

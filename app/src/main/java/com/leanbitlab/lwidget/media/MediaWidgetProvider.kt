@@ -54,11 +54,16 @@ class MediaWidgetProvider : AppWidgetProvider() {
         fun hasAccess(context: Context): Boolean =
             NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
 
-        fun hasWidgets(context: Context): Boolean = widgetIds(context).isNotEmpty()
+        fun hasWidgets(context: Context): Boolean =
+            blueprintIds(context).isNotEmpty() || softIds(context).isNotEmpty()
 
-        private fun widgetIds(context: Context): IntArray =
+        private fun blueprintIds(context: Context): IntArray =
             AppWidgetManager.getInstance(context)
                 .getAppWidgetIds(ComponentName(context, MediaWidgetProvider::class.java))
+
+        private fun softIds(context: Context): IntArray =
+            AppWidgetManager.getInstance(context)
+                .getAppWidgetIds(ComponentName(context, SoftPlayerWidgetProvider::class.java))
 
         /** The session that's playing, or else the most recently active one. */
         fun activeController(context: Context): MediaController? {
@@ -73,41 +78,25 @@ class MediaWidgetProvider : AppWidgetProvider() {
             }
         }
 
+        /** Redraws both players: the Blueprint one for the cover screen and the soft one for the fold. */
         fun updateAll(context: Context) {
-            val ids = widgetIds(context)
-            if (ids.isEmpty()) return
-            AppWidgetManager.getInstance(context).updateAppWidget(ids, build(context))
+            val manager = AppWidgetManager.getInstance(context)
+            blueprintIds(context).takeIf { it.isNotEmpty() }?.let {
+                manager.updateAppWidget(it, build(context, R.layout.widget_media_blueprint, soft = false))
+            }
+            softIds(context).takeIf { it.isNotEmpty() }?.let {
+                manager.updateAppWidget(it, build(context, R.layout.widget_media_soft, soft = true))
+            }
         }
 
-        private fun build(context: Context): RemoteViews {
-            val views = RemoteViews(context.packageName, R.layout.widget_media_blueprint)
+        private fun build(context: Context, layoutId: Int, soft: Boolean): RemoteViews {
+            val views = RemoteViews(context.packageName, layoutId)
 
-            // Follow the main widget's colours and theme so the two read as a set. Its settings are
-            // saved per widget, so borrow the first placed Lwidget's, falling back to the defaults.
-            val globalPrefs = context.getSharedPreferences("com.leanbitlab.lwidget.PREFS", Context.MODE_PRIVATE)
-            val mainWidgetId = AppWidgetManager.getInstance(context)
-                .getAppWidgetIds(ComponentName(context, com.leanbitlab.lwidget.AwidgetProvider::class.java))
-                .firstOrNull()
-            val prefs = if (mainWidgetId != null) {
-                com.leanbitlab.lwidget.FallbackPreferences(
-                    context.getSharedPreferences("com.leanbitlab.lwidget.PREFS_$mainWidgetId", Context.MODE_PRIVATE),
-                    globalPrefs
-                )
-            } else globalPrefs
-            val systemNight = (android.content.res.Resources.getSystem().configuration.uiMode and
-                android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
-            val isLight = when (prefs.getInt("theme_mode", if (prefs.getBoolean("use_system_theme", true)) 0 else 2)) {
-                1 -> true
-                2 -> false
-                else -> !systemNight
-            }
-            val dynamic = prefs.getBoolean("use_dynamic_colors", true)
-            val primary = ColorResolver.resolveColor(context, prefs, dynamic, prefs.getInt("text_color_primary_idx", 0), true, isLight)
-            val secondary = ColorResolver.resolveColor(context, prefs, dynamic, prefs.getInt("text_color_secondary_idx", 0), false, isLight)
-            val label = android.graphics.Color.argb(
-                (android.graphics.Color.alpha(secondary) * 0.6f).toInt(),
-                android.graphics.Color.red(secondary), android.graphics.Color.green(secondary), android.graphics.Color.blue(secondary)
-            )
+            val palette = com.leanbitlab.lwidget.WidgetPalette.resolve(context)
+            val primary = palette.primary
+            val secondary = palette.secondary
+            val label = palette.label
+            val isLight = palette.isLight
 
             for (id in listOf(R.id.media_corner_tl, R.id.media_corner_tr, R.id.media_corner_bl, R.id.media_corner_br)) {
                 views.setInt(id, "setColorFilter", primary)
@@ -124,6 +113,8 @@ class MediaWidgetProvider : AppWidgetProvider() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 views.setColorStateList(R.id.media_progress, "setProgressTintList", ColorStateList.valueOf(primary))
             }
+
+            if (soft) views.setImageViewResource(R.id.media_art, R.drawable.desk_art_placeholder)
 
             if (!hasAccess(context)) {
                 views.setTextViewText(R.id.media_app, context.getString(R.string.media_label))
@@ -173,6 +164,13 @@ class MediaWidgetProvider : AppWidgetProvider() {
                     ?: ""
             )
 
+            if (soft) {
+                val art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
+                    ?: metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
+                    ?: metadata.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
+                art?.let { views.setImageViewBitmap(R.id.media_art, monochromeThumb(it)) }
+            }
+
             val state = controller.playbackState
             val playing = state?.state == PlaybackState.STATE_PLAYING
             views.setImageViewResource(R.id.media_play, if (playing) R.drawable.ic_media_pause else R.drawable.ic_media_play)
@@ -195,6 +193,20 @@ class MediaWidgetProvider : AppWidgetProvider() {
                 ?: context.packageManager.getLaunchIntentForPackage(controller.packageName)?.let { openActivity(context, it, 4) }
             open?.let { views.setOnClickPendingIntent(R.id.media_text, it) }
             return views
+        }
+
+        /** Small, greyscale, rounded cover so colourful artwork doesn't break the monochrome look. */
+        private fun monochromeThumb(source: android.graphics.Bitmap): android.graphics.Bitmap {
+            val size = 96
+            val out = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+            val canvas = android.graphics.Canvas(out)
+            val scaled = android.graphics.Bitmap.createScaledBitmap(source, size, size, true)
+            val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                shader = android.graphics.BitmapShader(scaled, android.graphics.Shader.TileMode.CLAMP, android.graphics.Shader.TileMode.CLAMP)
+                colorFilter = android.graphics.ColorMatrixColorFilter(android.graphics.ColorMatrix().apply { setSaturation(0f) })
+            }
+            canvas.drawRoundRect(android.graphics.RectF(0f, 0f, size.toFloat(), size.toFloat()), 18f, 18f, paint)
+            return out
         }
 
         private fun controlIntent(context: Context, action: String, requestCode: Int): PendingIntent =

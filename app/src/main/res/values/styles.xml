@@ -8,6 +8,13 @@
     </style>
     <color name="my_primary">#2D0040</color>
 
+    <!-- Floating note editor opened from the Notes widget -->
+    <style name="Theme.Lwidget.NoteEditor" parent="Theme.Material3.DayNight.Dialog">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowMinWidthMajor">88%</item>
+        <item name="android:windowMinWidthMinor">92%</item>
+    </style>
+
     <style name="EventText">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
