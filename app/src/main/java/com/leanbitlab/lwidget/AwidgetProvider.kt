@@ -260,7 +260,8 @@ class AwidgetProvider : AppWidgetProvider() {
             val sizeEvents = prefs.getFloat("size_events", 14f)
 
             // Fetch Breezy Weather Data only if weather condition is enabled
-            val bweather = if (showWeatherCondition) {
+            val showForecast = prefs.getBoolean("show_forecast", false)
+            val bweather = if (showWeatherCondition || showForecast) {
                 com.leanbitlab.lwidget.weather.BreezyWeatherFetcher.fetchLocalWeather(context)
             } else null
             val showWeatherIconOnly = prefs.getBoolean("show_weather_icon_only", false) 
@@ -626,12 +627,12 @@ class AwidgetProvider : AppWidgetProvider() {
                             hasWarning = true
                             weatherCode = fCode
                             
-                            // Determine string representation of the day
-                            val dayText = when (index) {
-                                0 -> "today"
+                            // The forecast list starts tomorrow (today is carried in the current fields)
+                            val daysAhead = index + 1
+                            val dayText = when (daysAhead) {
                                 1 -> "tomorrow"
                                 else -> {
-                                    val localDate = java.time.LocalDate.now().plusDays(index.toLong())
+                                    val localDate = java.time.LocalDate.now().plusDays(daysAhead.toLong())
                                     localDate.dayOfWeek.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.getDefault())
                                 }
                             }
@@ -639,9 +640,9 @@ class AwidgetProvider : AppWidgetProvider() {
                             // Extract probability and create warning string
                             val precipString = if (forecast.precipProbability != null && forecast.precipProbability > 0) "${forecast.precipProbability}% " else ""
                             val conditionWarning = when (fCode) {
-                                in listOf(500, 501, 502, 503, 504, 511, 520, 521, 522, 531) -> if (index <= 1) "Rain $dayText" else "Rain on $dayText"
-                                in listOf(600, 601, 602, 611, 612, 615, 616, 620, 621, 622) -> if (index <= 1) "Snow $dayText" else "Snow on $dayText"
-                                in listOf(210, 211, 212, 221, 230, 231, 232) -> if (index <= 1) "Storm $dayText" else "Storm on $dayText"
+                                in listOf(500, 501, 502, 503, 504, 511, 520, 521, 522, 531) -> if (daysAhead == 1) "Rain $dayText" else "Rain on $dayText"
+                                in listOf(600, 601, 602, 611, 612, 615, 616, 620, 621, 622) -> if (daysAhead == 1) "Snow $dayText" else "Snow on $dayText"
+                                in listOf(210, 211, 212, 221, 230, 231, 232) -> if (daysAhead == 1) "Storm $dayText" else "Storm on $dayText"
                                 else -> "Warning"
                             }
                             weatherText = "$precipString$conditionWarning"
@@ -655,18 +656,7 @@ class AwidgetProvider : AppWidgetProvider() {
                     conditionText = "Unknown"
                 }
 
-                val weatherDrawableRes = when (weatherCode) {
-                    800 -> R.drawable.ic_weather_sunny
-                    801, 802 -> R.drawable.ic_weather_partly_cloudy
-                    803, 804 -> R.drawable.ic_weather_cloudy
-                    in listOf(500, 501, 502, 503, 504, 511, 520, 521, 522, 531) -> R.drawable.ic_weather_rainy
-                    in listOf(600, 601, 602, 611, 612, 615, 616, 620, 621, 622) -> R.drawable.ic_weather_snowy
-                    771 -> R.drawable.ic_weather_windy
-                    741 -> R.drawable.ic_weather_foggy
-                    751 -> R.drawable.ic_weather_mist
-                    in listOf(210, 211, 212, 221, 230, 231, 232) -> R.drawable.ic_weather_thunderstorm
-                    else -> R.drawable.ic_weather_cloudy
-                }
+                val weatherDrawableRes = weatherIconFor(weatherCode)
 
                 views.setImageViewResource(R.id.icon_weather, weatherDrawableRes)
                 views.setInt(R.id.icon_weather, "setColorFilter", secondaryColor)
@@ -936,12 +926,67 @@ class AwidgetProvider : AppWidgetProvider() {
                 views.setViewVisibility(R.id.icon_bio_header, if (activityColumn || restColumn) android.view.View.VISIBLE else android.view.View.GONE)
                 views.setInt(R.id.icon_bio_header, "setColorFilter", labelColor)
 
+                // Current weather sits under the date; the air temperature comes from Breezy
+                val fahrenheit = prefs.getInt("temp_unit_idx", 0) == 1
+                val weatherLine = showWeatherCondition && bweather != null
+                views.setViewVisibility(R.id.weather_now, if (weatherLine) android.view.View.VISIBLE else android.view.View.GONE)
+                if (weatherLine) {
+                    val airTemp = displayTemp(bweather?.currentTemp, fahrenheit)
+                    views.setViewVisibility(R.id.text_weather_temp, if (airTemp != null) android.view.View.VISIBLE else android.view.View.GONE)
+                    if (airTemp != null) {
+                        views.setTextViewText(R.id.text_weather_temp, "$airTemp°")
+                        views.setTextColor(R.id.text_weather_temp, primaryColor)
+                    }
+                }
+
+                // Five-day strip: today from the current fields, then the forecast list (which starts tomorrow)
+                val forecastDays = if (showForecast && bweather != null) {
+                    val today = listOf(Triple(bweather.currentConditionCode, bweather.todayMaxTemp, bweather.todayMinTemp))
+                    today + (bweather.forecasts ?: emptyList()).map { Triple(it.conditionCode, it.maxTemp, it.minTemp) }
+                } else emptyList()
+                views.setViewVisibility(R.id.forecast_row, if (forecastDays.size >= 2) android.view.View.VISIBLE else android.view.View.GONE)
+
+                val forecastCells = listOf(
+                    Triple(R.id.forecast_day_0, R.id.forecast_label_0, R.id.forecast_icon_0) to R.id.forecast_temp_0,
+                    Triple(R.id.forecast_day_1, R.id.forecast_label_1, R.id.forecast_icon_1) to R.id.forecast_temp_1,
+                    Triple(R.id.forecast_day_2, R.id.forecast_label_2, R.id.forecast_icon_2) to R.id.forecast_temp_2,
+                    Triple(R.id.forecast_day_3, R.id.forecast_label_3, R.id.forecast_icon_3) to R.id.forecast_temp_3,
+                    Triple(R.id.forecast_day_4, R.id.forecast_label_4, R.id.forecast_icon_4) to R.id.forecast_temp_4
+                )
+                val todayDate = java.time.LocalDate.now()
+                for ((i, cell) in forecastCells.withIndex()) {
+                    val (ids, tempId) = cell
+                    val (dayId, labelId, iconId) = ids
+                    val day = forecastDays.getOrNull(i)
+                    views.setViewVisibility(dayId, if (day != null) android.view.View.VISIBLE else android.view.View.GONE)
+                    if (day == null) continue
+                    val (code, max, min) = day
+                    val label = if (i == 0) context.getString(R.string.forecast_today) else
+                        todayDate.plusDays(i.toLong()).dayOfWeek
+                            .getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.getDefault())
+                            .uppercase(java.util.Locale.getDefault())
+                    views.setTextViewText(labelId, label)
+                    views.setTextColor(labelId, labelColor)
+                    views.setImageViewResource(iconId, weatherIconFor(code))
+                    views.setInt(iconId, "setColorFilter", secondaryColor)
+                    val hi = displayTemp(max, fahrenheit)
+                    val lo = displayTemp(min, fahrenheit)
+                    views.setTextViewText(tempId, when {
+                        hi != null && lo != null -> "$hi°/$lo°"
+                        hi != null -> "$hi°"
+                        else -> ""
+                    })
+                    views.setTextColor(tempId, primaryColor)
+                }
+
                 // Bottom system row
                 val sysCells = listOf(
                     Triple(R.id.cell_batt, showBattery, R.id.label_batt),
                     Triple(R.id.cell_disk, showStorage, R.id.label_disk),
                     Triple(R.id.cell_net, showData, R.id.label_net),
-                    Triple(R.id.cell_ram, showRam, R.id.label_ram)
+                    Triple(R.id.cell_ram, showRam, R.id.label_ram),
+                    // "Temperature" is the battery's, so it belongs with the system figures
+                    Triple(R.id.cell_temp, showTemp, R.id.label_temp)
                 )
                 for ((cellId, visible, labelId) in sysCells) {
                     views.setViewVisibility(cellId, if (visible) android.view.View.VISIBLE else android.view.View.GONE)
@@ -958,7 +1003,9 @@ class AwidgetProvider : AppWidgetProvider() {
                     R.id.text_battery to sizeBattery,
                     R.id.text_storage to sizeStorage,
                     R.id.text_data_usage to sizeData,
-                    R.id.text_ram to sizeRam
+                    R.id.text_ram to sizeRam,
+                    // battery temperature: match the battery figure so the row stays uniform
+                    R.id.text_temp to sizeBattery
                 )
                 for ((valueId, size) in sysValues) {
                     views.setTextViewTextSize(valueId, android.util.TypedValue.COMPLEX_UNIT_SP, size.coerceIn(9f, 16f))
@@ -1042,6 +1089,29 @@ class AwidgetProvider : AppWidgetProvider() {
             views.setOnClickPendingIntent(R.id.widget_root, settingsPendingIntent)
 
             return views
+        }
+
+        private fun weatherIconFor(code: Int?): Int = when (code) {
+            800 -> R.drawable.ic_weather_sunny
+            801, 802 -> R.drawable.ic_weather_partly_cloudy
+            803, 804 -> R.drawable.ic_weather_cloudy
+            in listOf(500, 501, 502, 503, 504, 511, 520, 521, 522, 531) -> R.drawable.ic_weather_rainy
+            in listOf(600, 601, 602, 611, 612, 615, 616, 620, 621, 622) -> R.drawable.ic_weather_snowy
+            771 -> R.drawable.ic_weather_windy
+            741 -> R.drawable.ic_weather_foggy
+            751 -> R.drawable.ic_weather_mist
+            in listOf(210, 211, 212, 221, 230, 231, 232) -> R.drawable.ic_weather_thunderstorm
+            else -> R.drawable.ic_weather_cloudy
+        }
+
+        /**
+         * Breezy shares weather in Gadgetbridge's format, which carries temperatures in Kelvin.
+         * Anything under 150 is taken as already being Celsius.
+         */
+        internal fun displayTemp(raw: Int?, fahrenheit: Boolean): Int? {
+            if (raw == null) return null
+            val celsius = if (raw > 150) raw - 273.15 else raw.toDouble()
+            return kotlin.math.round(if (fahrenheit) celsius * 9 / 5 + 32 else celsius).toInt()
         }
 
         /** The same widget-then-global lookup the settings screen writes through. */

@@ -1226,6 +1226,7 @@ class MainActivity : AppCompatActivity() {
             isContent = true
         ).also { it.tag = "weather_condition" }
         bindToggle(R.id.row_weather_bold, getString(R.string.row_bold_text), "bold_weather", false)
+        bindToggle(R.id.row_weather_forecast, getString(R.string.row_weather_forecast), "show_forecast", false)
 
         // Override weather listener for Breezy Weather check
         weatherSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -1912,6 +1913,7 @@ class MainActivity : AppCompatActivity() {
                 "show_steps" to true, "show_screen_time" to true,
                 "show_time" to true, "show_date" to true,
                 "date_format_idx" to 1, // Sun, Sep 13
+                "show_forecast" to true,
                 "bold_battery" to false, "bold_storage" to false, "bold_ram" to false, "bold_data_usage" to false,
                 "size_time" to 42f, "size_date" to 14f,
                 "size_battery" to 13f, "size_storage" to 13f, "size_data" to 13f, "size_ram" to 13f,

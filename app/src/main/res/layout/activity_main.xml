@@ -1125,6 +1125,11 @@
                             android:id="@+id/row_weather_bold"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"/>
+
+                        <include layout="@layout/settings_toggle_row"
+                            android:id="@+id/row_weather_forecast"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

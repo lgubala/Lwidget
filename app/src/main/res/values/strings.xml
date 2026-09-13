@@ -106,6 +106,9 @@
     <string name="bp_label_disk">DISK</string>
     <string name="bp_label_net">NET</string>
     <string name="bp_label_ram">RAM</string>
+    <string name="bp_label_temp">TEMP</string>
+    <string name="row_weather_forecast">Show 5-day forecast (Blueprint)</string>
+    <string name="forecast_today">TODAY</string>
     <string name="category_health">Health Connect</string>
     <string name="section_health_connect">Use Health Connect</string>
     <string name="section_sleep">Sleep</string>
