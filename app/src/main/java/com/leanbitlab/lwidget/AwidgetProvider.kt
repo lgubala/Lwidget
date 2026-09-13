@@ -825,7 +825,8 @@ class AwidgetProvider : AppWidgetProvider() {
                     val intrinsicGap = size * 0.18f
                     maxOf(0, dpToPx(paddingVal - intrinsicGap))
                 }
-                views.setViewPadding(R.id.events_container, 0, topMargin, 0, 0)
+                // Blueprint's layout already spaces the agenda; extra padding here costs a launcher row
+                views.setViewPadding(R.id.events_container, 0, if (isBlueprint) 0 else topMargin, 0, 0)
             }
 
             // Right Side Stack: ordered by user preference
@@ -1340,6 +1341,8 @@ class AwidgetProvider : AppWidgetProvider() {
             R.id.text_event_10
         )
 
+        private const val BLUEPRINT_AGENDA_LINES = 3
+
         /** Task-only slots, used when the agenda is laid out as two columns. */
         private val taskSlots = listOf(
             R.id.text_task_1, R.id.text_task_2, R.id.text_task_3,
@@ -1356,7 +1359,9 @@ class AwidgetProvider : AppWidgetProvider() {
             showTasks: Boolean, sizeTasks: Float,
             primaryColor: Int, secondaryColor: Int
         ) {
-            val eventSlots = agendaSlots.take(taskSlots.size)
+            // Three lines a column keeps the whole Blueprint widget within three launcher rows
+            val eventSlots = agendaSlots.take(BLUEPRINT_AGENDA_LINES)
+            val taskLines = taskSlots.take(BLUEPRINT_AGENDA_LINES)
 
             views.setViewVisibility(R.id.events_column, if (showEvents) android.view.View.VISIBLE else android.view.View.GONE)
             views.setViewVisibility(R.id.tasks_column, if (showTasks) android.view.View.VISIBLE else android.view.View.GONE)
@@ -1369,7 +1374,7 @@ class AwidgetProvider : AppWidgetProvider() {
             }
 
             val tasksUsed = if (showTasks) {
-                loadTasks(context, views, sizeTasks, primaryColor, taskSlots)
+                loadTasks(context, views, sizeTasks, primaryColor, taskLines)
             } else 0
             for (i in tasksUsed until taskSlots.size) {
                 views.setViewVisibility(taskSlots[i], android.view.View.GONE)
