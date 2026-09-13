@@ -143,7 +143,6 @@
     <string name="desk_tasks_permission">Allow Lwidget to read Tasks.org in its settings</string>
     <string name="desk_tasks_none">Nothing to do</string>
     <string name="search_hint">Search</string>
-    <string name="search_voice">Voice search</string>
     <string name="section_desk">Fold Desk</string>
     <string name="desk_settings_hint">Widgets for the unfolded screen, in a calmer style than the cover widget: Today on the left page, Notes and Tasks on the right, Search and Player along the bottom. They follow the same colours as your Lwidget.</string>
     <string name="media_widget_description">Blueprint player for whatever is playing</string>

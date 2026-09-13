@@ -58,12 +58,6 @@
         <intent>
             <action android:name="android.intent.action.WEB_SEARCH" />
         </intent>
-        <intent>
-            <action android:name="android.speech.action.VOICE_SEARCH_HANDS_FREE" />
-        </intent>
-        <intent>
-            <action android:name="android.speech.action.WEB_SEARCH" />
-        </intent>
         <package android:name="com.samsung.android.calendar" />
     </queries>
 
