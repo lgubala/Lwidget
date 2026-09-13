@@ -614,9 +614,12 @@ class AwidgetProvider : AppWidgetProvider() {
                 var weatherText = bweather.currentCondition
                 var hasWarning = false
                 
-                // Check week forecasts for warnings
+                // Check week forecasts for warnings. This swaps the current condition (text and icon)
+                // for the week's first rain/snow/storm, so with Blueprint's forecast strip on screen it
+                // only repeats the strip and makes the "now" line read like it's raining today.
                 val forecasts = bweather.forecasts
-                if (forecasts != null && forecasts.isNotEmpty()) {
+                val forecastOnScreen = isBlueprint && showForecast
+                if (!forecastOnScreen && forecasts != null && forecasts.isNotEmpty()) {
                     for ((index, forecast) in forecasts.take(7).withIndex()) {
                         val fCode = forecast.conditionCode
                         if (fCode != null && (
